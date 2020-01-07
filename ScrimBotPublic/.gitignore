@@ -337,6 +337,6 @@ ASALocalRun/
 .localhistory/
 
 # BeatPulse healthcheck temp database
-healthchecksdbScrimBotPublic.config.json 
+healthchecksdbScrimBotPublic
 
 .config.json
