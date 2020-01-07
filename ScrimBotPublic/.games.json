@@ -1,0 +1,44 @@
+{
+  "Games": {
+    "Team": {
+      "dota": {
+        "playerreq": 10,
+        "dispname": "Dota 2",
+        "icon": "https://i.imgur.com/OlWIlyY.jpg?1",
+        "colour": "0xce0000",
+        "alias": [ "dota2" ]
+      },
+      "csgo": {
+        "playerreq": 10,
+        "dispname": "CS:GO",
+        "icon": "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/avatars/6d/6d448876809d7b79aa8f070271c07b1296459400_full.jpg",
+        "colour": "0xff8c1a",
+        "alias": [ "cs", "counterstrike" ]
+      },
+      "overwatch": {
+        "playerreq": 12,
+        "dispname": "Overwatch",
+        "icon": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/55/Overwatch_circle_logo.svg/1200px-Overwatch_circle_logo.svg.png",
+        "colour": "0xffa31a",
+        "alias": [ "ow" ]
+      },
+      "test": {
+        "playerreq": 2,
+        "dispname": "Test",
+        "icon": "https://cdn.pixabay.com/photo/2012/04/24/12/43/t-39853_960_720.png",
+        "colour": "0xffffff",
+        "alias": [ "t" ]
+
+      }
+    },
+    "FFA": {
+      "ttt": {
+        "maxplayers": 0,
+        "dispname": "Trouble in Terrorist Town",
+        "icon": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c7/Gmodlogo.svg/1200px-Gmodlogo.svg.png",
+        "colour": "0x4789da",
+        "alias": []
+      }
+    }
+  }
+}

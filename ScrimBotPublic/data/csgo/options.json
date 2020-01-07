@@ -1,0 +1,14 @@
+{
+  "map": {
+    "dispname": "Map",
+    "category": "pick_one",
+    "choices": [ "Vertigo", "Inferno", "Mirage", "Dust 2", "Nuke", "Train", "Cache" ],
+    "lock": 1
+  },
+  "side": {
+    "dispname": "Side",
+    "category": "side",
+    "choices": [ "Terrorist", "Counter-Terrorist" ],
+    "lock": 1
+  }
+}

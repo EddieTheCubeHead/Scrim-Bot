@@ -1,0 +1,77 @@
+ ###############################################################################
+
+									to-do
+
+############################################################################### 
+  
+  beta 0.9.8:
+
+Comment cleanup for all modules:
+	-main (done)
+	-scrim_methods (done)
+	-elo_methods (done)
+	-cogs (done)
+		-scrim (done)
+		-elo (done)
+		-help (done)
+
+Switch all variables to more readable naming scheme:
+	-main (done)
+	-scrim_methods (done)
+	-elo_methods (done)
+	-cogs (done)
+		-scrim (done)
+		-elo (done)
+		-help (done)
+
+Move as many repeated tasks to functions as possible
+
+	DONE: scrim cog shortened from 1500loc to 1000loc while scrim_methods gained
+	~100loc. Overall 400loc less
+
+Play or simulate a full 10 player scrim on all team assignment methods ESPECIALLY
+pick-up games to squash leftover bugs (done)
+
+
+  1.0.0:
+
+Test all team choosing modes (done)
+
+Get and implement feedback on user-interface (done)
+
+  1.1.0:
+
+Bot admin functionality
+
+Subscribing to scrims
+
+Scrim usability improvements:
+	- DONE: Delete messages when a scrim is ongoing
+	- Autoprint scrim ip
+	- DONE: Automatically terminate a scrim after 15 minutes of no activity
+
+###############################################################################
+
+						  long term plans and goals
+
+############################################################################### 
+
+Integrate with a server to actually host the scrims (pipe dream)
+
+Map-, side-, first pick-, etc. assigning with the bot
+
+Implement functionality for FFA and 1v1 (tournament) games.
+	-Tournament support for team-based games
+
+Implement admin functionality for the bot independent from server admins both
+on a server- basis and on a global basis.
+	-Add option for servers to toggle if server admin == bot admin
+
+Add support for configurable command prefixes
+
+MVP and salt king votes after a scrim
+
+Automatically terminate a scrim after x minutes if no activity
+
+Delete all messages added to a channel setting up a scrim after x seconds.
+	Maybe toggleable?
