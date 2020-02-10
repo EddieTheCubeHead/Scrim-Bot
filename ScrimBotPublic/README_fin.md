@@ -1,6 +1,6 @@
 ###############################################################################
 
-                             scrimbotti beta0.9.8
+                               scrimbotti 1.0.0
 							      07.11.2019
 
 ###############################################################################
@@ -90,6 +90,20 @@ pelin pelaajien tilastot järjestettynä annetun tilaston mukaan.
                                 versiohistoria
 
 ###############################################################################
+
+  1.0.0 -- 02.02.2020
+    -Koulutöiden vuoksi projekti sivuroolissia pitkän aikaa, suuria muutoksia ei
+	ole tehty, mutta käytön myötä ilmenneitä bugeja korjattu tarpeeksi, jotta
+	botti tuntuu vakaalta ja valmiilta.
+		-Tiimien muokkaus uudelleenkirjoitettava 1.1.0: tällö hetkellä botti voi
+		mennä jumiin, jos suorituksessa tulee ongelma kesken tiimien muokkauksen, jättäen
+		puolivalmiita listoja muuttujiin ja pakottaen uudelleenkäynnistyksen
+		muuttujien tyhjentämiseksi.
+	-Pieniä käytettävyysparannuksia ja pohjakoodi asetukset systeemille (1.2.0?)
+		-Aktiivinen scrim estää viestin lähettämisen kanavalle
+		-/note tämä kiertämiseksi
+		-Lukitsemattomat scrimit terminoidaan viidentoista minuutin jälkeen. Ajastin
+		uudelleenkäynnistetään kaikissa interaktioissa
 
   beta 0.9.8 -- 5.11.2019
 	-Koko koodin siistintä kommentteilla, docstringeillä, selkeämmillä muuttujilla

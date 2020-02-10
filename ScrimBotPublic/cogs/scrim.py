@@ -72,8 +72,8 @@ class ScrimCog(commands.Cog):
                 if user in current.participators:
                     await react.remove(user)
                     return None
-
-                current.add_user(user, "spectators")
+                else:
+                    current.add_user(user, "spectators")
 
                 current.embed.set_field_at(1, name="**Spectators**", value=current.get_formatted_members("spectators"), inline=True)
                 await current.message.edit(embed=current.embed)
@@ -333,6 +333,7 @@ class ScrimCog(commands.Cog):
             current.phase = "locked"
             current.embed.description = "Players locked. Use reactions for manual team selection or type '**/teams** _random/balanced/balancedrandom_' to define teams automatically."
             current.players = current.players[:current.game.playerreq] #remove extra players
+            current.player_backup = set(current.players)
 
             await current.message.clear_reactions()   
             await current.message.add_reaction("1\u20E3")   #keycap 1
@@ -568,15 +569,8 @@ class ScrimCog(commands.Cog):
             return await scrim_methods.temporary_feedback(ctx, "You cannot do that now.")
 
         current.clear_teams()
-
-        for p in current.players:
-            try:
-                current.game.players[str(p.id)]
-            except:
-                if current.game.addelo(str(p.id), 1800):
-                    await scrim_methods.temporary_feedback(ctx, f"Didn't find existing elo statistics for user {p.display_name}. They have been assigned the default elo value (1800).")
-                else:
-                    return scrim_methods.temporary_feedback(ctx, f"Unexpected error while trying to set default elo value for user {p.diplay_name}. Could not proceed with current operation.")
+        if not current.set_missing_elos():
+            return await scrim_methods.temporary_feedback(ctx, "Error when assigning missing elo values to players.")
     
 
         #get a list of ALL possible team combinations for team 1
@@ -632,8 +626,8 @@ class ScrimCog(commands.Cog):
             return await scrim_methods.temporary_feedback(ctx, "Threshold out of limits. Please give a value between 1 and 50.")
 
         current.clear_teams()
-        current.set_missing_elos()
-
+        if not current.set_missing_elos():
+            return await scrim_methods.temporary_feedback(ctx, "Error when assigning missing elo values to players.")
 
         teamcomps = list(itertools.combinations(current.players, int(current.game.playerreq/2)))
         threshold /= 100

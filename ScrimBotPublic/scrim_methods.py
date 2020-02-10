@@ -14,12 +14,13 @@ message -- the discord message the main scrim is tied to
 embed -- the embed in the main message
 game -- the game the scrim is setup as, instance of elo_methods.Game
 phase -- declares the scrim's current phase
-players -- a list of players in the scrim
+players -- a list of unsassigned players in the scrim
+player_backup -- a set of all players in the scrim regardless of team
 team1 -- a list of team1 of the scrim
 team2 -- a list of team2 of the scrim
 spectators -- a list of spectators of the scrim
 caps -- a list of captains of the scrim
-voice -- a list ofvoice channels in the main channel's category
+voice -- a list of voice channels in the main scrim channel's category
 options -- a list of options the scrim has, saved as objects (see options_methods)
 last_interaction -- task loops since last interaction
 notes -- note messages connected to the current scrim
@@ -30,7 +31,7 @@ instances -- tracks all instances of Scrim
 participators -- tracks all participators in all scrims"""
 
     instances = []
-    participators = []
+    participators = set()
 
     def __init__(self, id, passtru, *, message=None, embed=None, game=None, phase="no scrim", master=None):
         self.id = id
@@ -40,6 +41,7 @@ participators -- tracks all participators in all scrims"""
         self.phase = phase
         self.master = master
         self.players = []
+        self.player_backup = set()
         self.team1 = []
         self.team2 = []
         self.spectators = []
@@ -64,26 +66,10 @@ participators -- tracks all participators in all scrims"""
         self.game = None
         self.phase = "no scrim"
         self.master = None
-        for p in self.players:
-            try:
-                Scrim.participators.remove(p)
-            except:
-                pass
-        for p in self.team1:
-            try:
-                Scrim.participators.remove(p)
-            except:
-                pass
-        for p in self.team2:
-            try:
-                Scrim.participators.remove(p)
-            except:
-                pass
-        for p in self.spectators:
-            try:
-                Scrim.participators.remove(p)
-            except:
-                pass
+        for p in self.player_backup + self.spectators:
+            Scrim.participators.discard(p)
+
+        self.player_backup.clear()
         self.players.clear()
         self.team1.clear()
         self.team2.clear()
@@ -149,14 +135,9 @@ returns a string with the players' display names."""
 
         """Clears both teams for a given scrim and moves all players to unassigned."""
 
-        for player in self.team1:
-            self.team1.remove(player)
-            self.players.append(player)
-
-        for player in self.team2:
-            self.team2.remove(player)
-            self.players.append(player)
-
+        self.players = list(self.player_backup)
+        self.team1.clear()
+        self.team2.clear()
         self.caps.clear()
 
     def move_to(self, player, destination="players"):
@@ -168,7 +149,10 @@ player -- a player in the given scrim
 destination -- str team1, team2, caps or players (default: players)"""
 
         if destination[:4] == "team":
-            vars(self)[destination].append(player)
+            try:
+                vars(self)[destination].append(player)
+            except:
+                return False
             self.players.remove(player)
             return True
 
@@ -214,7 +198,7 @@ returns True is successful, False if not"""
 
         else:
             vars(self)[group].append(user)
-            self.participators.append(user)
+            self.participators.add(user)
 
     def remove_user(self, user):
 
@@ -223,12 +207,12 @@ returns True is successful, False if not"""
 
         if user in self.players:
             self.players.remove(user)
-            self.participators.remove(user)
+            self.participators.discard(user)
             return True
 
         if user in self.spectators:
             self.spectators.remove(user)
-            self.participators.remove(user)
+            self.participators.discard(user)
             return True
     
     def set_missing_elos(self):

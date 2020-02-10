@@ -65,6 +65,8 @@ async def update(ctx):
         except:
             await scrim_methods.temporary_feedback(ctx, "Couldn't update commands.")
 
+        scrim_methods.Scrim.participators.clear()
+
 
  
 #################################################################################

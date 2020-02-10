@@ -1,6 +1,6 @@
 ###############################################################################
 
-                             scrimbot beta0.9.8
+                                scrimbot 1.0.0
 							      07.11.2019
 
 ###############################################################################
@@ -114,6 +114,19 @@ with '/leaderboard (game) (statistic)'.
 
 ###############################################################################
 
+  1.0.0 -- 02.02.2020
+    -The development was on a slow burn for a while due to studies. Small bugfixes
+	done based on usage with friends have however made the bot stable enough to be
+	called ready.
+		-The management of teams in the code needs to be rewritten for 1.1.0, at
+		the moment if the execution halts during a function handling team lists
+		the bot will be left with multiple half-filled lists in variables, requiring
+		a restart to reset the said variables.
+	-Small usability improvements and base code for options -system (1.2.0?)
+		-An active scrim will now delete all messages on a channel
+		-/note to prevent said behaviour
+		-An unlocked scrim will now self-terminate after 15 minutes of inactivity
+
   beta 0.9.8 -- 5.11.2019
 	-Cleaning up the code with better commenting, docstings, more readable variable
 	names, more functions etc.
@@ -124,7 +137,7 @@ with '/leaderboard (game) (statistic)'.
 
 	-Cogs -implementation left some functions tied to the Scrim-class homeless.
 	These have been moved to the scrim_methods module.
-		-elo_module renamed to elo_methods to preserver the naming scheme
+		-elo_module renamed to elo_methods to preserve the naming scheme
 		-This fixed a bug in '/update' that wiped out all supported games
 
   beta 0.9.7 -- 31.10.2019

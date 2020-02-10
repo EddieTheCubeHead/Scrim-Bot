@@ -29,6 +29,14 @@
         "colour": "0xffffff",
         "alias": [ "t" ]
 
+      },
+      "rocket_league": {
+        "playerreq": 6,
+        "dispname": "Rocket League",
+        "icon": "https://i.imgur.com/BvQOQyN.png",
+        "colour": "0x0000ff",
+        "alias": [ "rl", "rocketleague", "rocket" ]
+
       }
     },
     "FFA": {

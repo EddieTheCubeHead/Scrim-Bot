@@ -44,11 +44,21 @@ Get and implement feedback on user-interface (done)
 Bot admin functionality
 
 Subscribing to scrims
+	-Probably need to implement a (full-ish) role system based on games
+
+Rewriting team management in code. 
+	-Take a look at replacing class variable Scrim.participators with a set (done)
+	-Possibly implementing a set of all participating players for each locked 
+	scrim to make duplicating or losing participators of a specific scrim impossible
 
 Scrim usability improvements:
 	- DONE: Delete messages when a scrim is ongoing
 	- Autoprint scrim ip
 	- DONE: Automatically terminate a scrim after 15 minutes of no activity
+
+	1.2.0:
+
+Options methods
 
 ###############################################################################
 
@@ -57,6 +67,9 @@ Scrim usability improvements:
 ############################################################################### 
 
 Integrate with a server to actually host the scrims (pipe dream)
+
+Rewrite pickup games for fuller support for things like choosing starting cap and
+allowing to pass strings such as ABABBABA to enable fully customized picking order
 
 Map-, side-, first pick-, etc. assigning with the bot
 
@@ -71,7 +84,8 @@ Add support for configurable command prefixes
 
 MVP and salt king votes after a scrim
 
-Automatically terminate a scrim after x minutes if no activity
+Automatically terminate a scrim after x minutes if no activity (done)
 
-Delete all messages added to a channel setting up a scrim after x seconds.
-	Maybe toggleable?
+Delete all messages added to a channel setting up a scrim after x seconds. (done)
+	-Implement better workarounds for urgent messages such as links to servers etc.
+	-Possibly implement a toggle command?
