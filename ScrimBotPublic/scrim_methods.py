@@ -66,7 +66,7 @@ participators -- tracks all participators in all scrims"""
         self.game = None
         self.phase = "no scrim"
         self.master = None
-        for p in self.player_backup + self.spectators:
+        for p in list(self.player_backup) + self.spectators:
             Scrim.participators.discard(p)
 
         self.player_backup.clear()
@@ -217,9 +217,13 @@ returns True is successful, False if not"""
     
     def set_missing_elos(self):
 
-        for player in self.team1 + self.team2:
+        for player in self.player_backup:
             if player.id not in self.players:
-                self.game.addelo(player.id, 1800)
+                try:
+                    self.game.addelo(player.id, 1800)
+                except:
+                    return False
+        return True
 
     @classmethod
     def setup_instances(self, client):

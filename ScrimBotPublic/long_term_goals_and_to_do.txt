@@ -49,7 +49,10 @@ Subscribing to scrims
 Rewriting team management in code. 
 	-Take a look at replacing class variable Scrim.participators with a set (done)
 	-Possibly implementing a set of all participating players for each locked 
-	scrim to make duplicating or losing participators of a specific scrim impossible
+	scrim to make duplicating or losing participators of a specific scrim impossible (done)
+	-Test the changed code for bugs
+	-Possibly implement better error management for Scrim.set_missing_elos (should ideally tell
+	which player changed the problem)
 
 Scrim usability improvements:
 	- DONE: Delete messages when a scrim is ongoing

@@ -576,6 +576,11 @@ class ScrimCog(commands.Cog):
         #get a list of ALL possible team combinations for team 1
         teamcomps = list(itertools.combinations(current.players, int(current.game.playerreq/2)))
         closest_winprob = 2
+        dummy_team1 = []
+        dummy_team2 = []
+        # balanced and balancedrandom have been constantly making problems when
+        # encountering a bug. Dummies aim to fix the bot breaking completely if
+        # the function encounters a problem.
     
         for team in teamcomps:
 
@@ -584,17 +589,24 @@ class ScrimCog(commands.Cog):
             for player in team:
                 tester_team.append(player)
 
-            current.team2 = list(set(current.players).difference(tester_team))
+            dummy_team2 = list(set(current.players).difference(tester_team))
 
-            winprob = current.game.winprob(tester_team, current.team2)
+            winprob = current.game.winprob(tester_team, dummy_team2)
 
             if abs(winprob-0.5) < abs(closest_winprob-0.5):
                 closest_winprob = winprob
 
-                current.team1.clear()
-                current.team1 = tester_team
+                dummy_team1.clear()
+                dummy_team1 = tester_team
                         
-        current.team2 = list(set(current.players).difference(current.team1))
+        dummy_team2 = list(set(current.players).difference(dummy_team1))
+
+        if not (len(dummy_team1) == len(dummy_team2) and set(dummy_team1+dummy_team2) == current.player_backup):
+            current.clear_teams()
+            return await scrim_methods.temporary_feedback(ctx, "Unexpected error when assigning teams.")
+
+        current.team1 = dummy_team1
+        current.team2 = dummy_team2
     
         current.players.clear()
         current.embed.set_field_at(0, name="**Unassigned players**", value="_empty_", inline=True)
@@ -634,14 +646,19 @@ class ScrimCog(commands.Cog):
         candidates = []
         smallest_three = []
         values = []
+        dummy_team1 = []
+        dummy_team2 = []
+        # balanced and balancedrandom have been constantly making problems when
+        # encountering a bug. Dummies aim to fix the bot breaking completely if
+        # the function encounters a problem.
     
         for team in teamcomps:
             tester_team = []
             for player in team:
                 tester_team.append(player)
-            current.team2 = list(set(current.players).difference(tester_team))
+            dummy_team2 = list(set(current.players).difference(tester_team))
 
-            winprob = current.game.winprob(tester_team, current.team2)
+            winprob = current.game.winprob(tester_team, dummy_team2)
 
             if len(values) < 3:
                 smallest_three.insert(0, tester_team)
@@ -656,11 +673,18 @@ class ScrimCog(commands.Cog):
                 candidates.append(tester_team)
 
         if len(candidates) >= len(smallest_three):
-            current.team1 = random.choice(candidates)
+            dummy_team1 = random.choice(candidates)
         else:
-            current.team1 = random.choice(smallest_three)
+            dummy_team1 = random.choice(smallest_three)
                         
-        current.team2 = list(set(current.players).difference(current.team1))    
+        dummy_team2 = list(set(current.players).difference(dummy_team1))
+        
+        if not (len(dummy_team1) == len(dummy_team2) and set(dummy_team1+dummy_team2) == current.player_backup):
+            current.clear_teams()
+            return await scrim_methods.temporary_feedback(ctx, "Unexpected error when assigning teams.")
+
+        current.team1 = dummy_team1
+        current.team2 = dummy_team2
 
         current.players.clear()
         current.embed.set_field_at(0, name="**Unassigned players**", value="_empty_", inline=True)
