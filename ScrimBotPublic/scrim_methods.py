@@ -225,7 +225,7 @@ returns True is successful, False if not"""
     async def set_missing_elos(self, ctx):
 
         for player in self.player_backup:
-            if player.id not in self.game.players:
+            if str(player.id) not in self.game.players:
                 try:
                     self.game.addelo(player.id, 1800)
                     await temporary_feedback(ctx, f"Player '{player.display_name}' missing an elo value! Assigned the default elo of 1800.", delete = False)
