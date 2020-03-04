@@ -12,7 +12,6 @@ import scrim_methods
 import elo_methods
 import main_methods
 
-import discord
 import logging
 import os
 

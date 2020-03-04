@@ -28,7 +28,6 @@
         "icon": "https://cdn.pixabay.com/photo/2012/04/24/12/43/t-39853_960_720.png",
         "colour": "0xffffff",
         "alias": [ "t" ]
-
       },
       "rocket_league": {
         "playerreq": 6,
@@ -46,6 +45,13 @@
         "icon": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c7/Gmodlogo.svg/1200px-Gmodlogo.svg.png",
         "colour": "0x4789da",
         "alias": []
+      },
+      "civilization5": {
+        "maxplayers": 6,
+        "dispname": "Civilization V",
+        "icon": "https://images.sftcdn.net/images/t_optimized,f_auto/p/6ab5bc4e-96d8-11e6-b45f-00163ec9f5fa/2860980152/civilization-v-logo.png",
+        "colour": "0xe5e104",
+        "alias": [ "civ 5", "civ5" ]
       }
     }
   }

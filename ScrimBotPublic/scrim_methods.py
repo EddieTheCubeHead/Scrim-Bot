@@ -149,22 +149,29 @@ player -- a player in the given scrim
 destination -- str team1, team2, caps or players (default: players)"""
 
         if destination[:4] == "team":
+            if player not in self.players:
+                return False
+
             try:
                 vars(self)[destination].append(player)
             except:
                 return False
+
             self.players.remove(player)
             return True
 
         elif destination == "caps":
-            if len(self.caps) >= 2:
+            if len(self.caps) >= 2 or player not in self.players:
                 return False
-            self.caps.append(player)
+
             if len(self.team1) == 0:
-                self.team1.append(player)
+                if not self.move_to(player, "team1"):
+                    return False
             else:
-                self.team2.append(player)
-            self.players.remove(player)
+                if not self.move_to(player, "team2"):
+                    return False
+
+            self.caps.append(player)
             return True
 
         elif player in self.caps:
@@ -215,12 +222,13 @@ returns True is successful, False if not"""
             self.participators.discard(user)
             return True
     
-    def set_missing_elos(self):
+    async def set_missing_elos(self, ctx):
 
         for player in self.player_backup:
-            if player.id not in self.players:
+            if player.id not in self.game.players:
                 try:
                     self.game.addelo(player.id, 1800)
+                    await temporary_feedback(ctx, f"Player '{player.display_name}' missing an elo value! Assigned the default elo of 1800.", delete = False)
                 except:
                     return False
         return True
@@ -266,6 +274,7 @@ ctx -- context message or reaction
 
 keyword arguments:
 check_master -- bool, if True, checks if context author is the master of the current scrim. (default: False)
+send_feedback -- bool, if True, sends verbal feedback on errors.
 
 returns an instance of scrim if successful, None if it failed to find a scrim or a master."""
 

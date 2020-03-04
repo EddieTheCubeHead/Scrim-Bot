@@ -406,7 +406,7 @@ class ScrimCog(commands.Cog):
 #################################################################################
 
     @teams.command(aliases=['pug'])
-    async def pickup(sm, ctx, cap="balanced", order="fair"):
+    async def pickup(self, ctx, cap="balanced", order="fair"):
 
         current = await scrim_methods.get_scrim(ctx, check_master=True)
         if not current:
@@ -446,20 +446,10 @@ class ScrimCog(commands.Cog):
 
         elif cap == "balanced":
 
-            current.set_missing_elos()
+            await current.set_missing_elos(ctx)
 
             highest_elo = 0
             second_elo = 0
-
-            for p in current.players:
-                try:
-                    current.game.players[str(p.id)]
-                except:
-                    if current.game.addelo(str(p.id), 1800):
-                        await scrim_methods.temporary_feedback(ctx, f"Didn't find existing elo statistics for user {p.diplay_name}. They have been assigned the default elo value (1800).")
-                    else:
-                        return await scrim_methods.temporary_feedback(ctx, f"Unexpected error while trying to set default elo value for user {p.diplay_name}. Could not proceed with current operation.")
-
 
             for player in current.players:
 
@@ -569,7 +559,7 @@ class ScrimCog(commands.Cog):
             return await scrim_methods.temporary_feedback(ctx, "You cannot do that now.")
 
         current.clear_teams()
-        if not current.set_missing_elos():
+        if not await current.set_missing_elos(ctx):
             return await scrim_methods.temporary_feedback(ctx, "Error when assigning missing elo values to players.")
     
 
@@ -638,7 +628,7 @@ class ScrimCog(commands.Cog):
             return await scrim_methods.temporary_feedback(ctx, "Threshold out of limits. Please give a value between 1 and 50.")
 
         current.clear_teams()
-        if not current.set_missing_elos():
+        if not await current.set_missing_elos(ctx):
             return await scrim_methods.temporary_feedback(ctx, "Error when assigning missing elo values to players.")
 
         teamcomps = list(itertools.combinations(current.players, int(current.game.playerreq/2)))
