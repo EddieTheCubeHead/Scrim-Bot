@@ -1,11 +1,11 @@
 ###############################################################################
 
-                                scrimbot 1.0.0
-							      07.11.2019
+                       scrimbot 1.1.0, dev version
+							    08.03.2019
 
 ###############################################################################
 
-							about the documentation
+						  about the documentation
 
 ###############################################################################
 
@@ -21,7 +21,7 @@ a personal project diary.
 
 A discord bot for setting up friendly scrims, or friendly matches where predecided 
 teams play against each other, among the members of a server. The bot creates
-an embed message serving as the main user interface with the '/setup (game)'
+an embed message serving as the main user interface with the '/scrim (game)'
 -command. The bot gets supported games from the .games json file and displays
 correct logo, name etc. based on the info on the file. Based on the game, the 
 bot keeps track of how many more players need to join. Joining as a spectator is
@@ -102,11 +102,7 @@ with '/leaderboard (game) (statistic)'.
 
 ###############################################################################
 
-  -map, side, first pick etc. selection
-  -Votes for the mvp and the saltiest player after a game.
-  -fill -argument for the '/teams' -command
-  -A feature for subscribing to a certain game on a certain server
-  -A feature for setting up all the needed channels with one adming command
+  -This has been moved to long_term_goals_and_to_do
 
 ###############################################################################
 

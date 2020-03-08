@@ -52,7 +52,7 @@ Rewriting team management in code.
 	scrim to make duplicating or losing participators of a specific scrim impossible (done)
 	-Test the changed code for bugs
 	-Possibly implement better error management for Scrim.set_missing_elos (should ideally tell
-	which player changed the problem)
+	which player changed the problem) (done)
 
 Scrim usability improvements:
 	- DONE: Delete messages when a scrim is ongoing
@@ -71,6 +71,11 @@ Options methods
 
 Integrate with a server to actually host the scrims (pipe dream)
 
+Server-specific options
+	-Larger servers: have a whitelist of user who can setup scrims
+	-Custom prefix for servers
+	-Change the default length of leaderboards displayed
+
 Rewrite pickup games for fuller support for things like choosing starting cap and
 allowing to pass strings such as ABABBABA to enable fully customized picking order
 
@@ -78,6 +83,7 @@ Map-, side-, first pick-, etc. assigning with the bot
 
 Implement functionality for FFA and 1v1 (tournament) games.
 	-Tournament support for team-based games
+		-Later tournaments/leagues for team-based games on a team basis
 
 Implement admin functionality for the bot independent from server admins both
 on a server- basis and on a global basis.

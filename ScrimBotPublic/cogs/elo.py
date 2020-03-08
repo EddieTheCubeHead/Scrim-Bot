@@ -39,15 +39,26 @@ class EloCog(commands.Cog):
 
     @commands.command(aliases=['lb','scoreboard','sb'])
     @commands.guild_only()
-    async def leaderboard(self, ctx, stat_game=None, stat="elo"):
+    async def leaderboard(self, ctx, stat_game=None, stat="elo", length=None):
         if not stat_game:
             return await scrim_methods.temporary_feedback(ctx, "Please specify a game. Type '/help games' for a list of all supported games.")
+
+        if length:
+            try:
+                length = int(length)
+            except:
+                return await scrim_methods.temporary_feedback(ctx, "Please specify length as a whole number.")
+        else:
+            try:
+                length = int(stat)
+                stat = "elo"
+            except:
+                pass
 
         for game in elo_methods.Game.instances:
             if stat_game in game.alias['alias']:
                 stat_game = game
                 break
-
         else:
             return await scrim_methods.temporary_feedback(ctx, f"Couldn't find the game '{stat_game}'. Type '/help games' for a list of all supported games.")
 
@@ -94,6 +105,7 @@ class EloCog(commands.Cog):
             return await scrim_methods.temporary_feedback(ctx, f"Couldn't find the stat '{stat}'. Type '/help leaderboard' for help.")
 
         embedprint = ""
+        counter = 0
 
         #sort the leaderboard
         for key, value in sorted(leaderboard.items(), key=lambda name: name[1], reverse=True):
@@ -102,6 +114,10 @@ class EloCog(commands.Cog):
                 embedprint += "%\n"
             else:
                 embedprint += "\n"
+
+            counter += 1
+            if length and length <= counter:
+                break
 
 
         lb = discord.Embed(color=stat_game.color)

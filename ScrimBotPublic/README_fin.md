@@ -1,7 +1,7 @@
 ###############################################################################
 
-                               scrimbotti 1.0.0
-							      07.11.2019
+                     scrimbotti 1.1.0, kehittäjäversio
+							    07.11.2019
 
 ###############################################################################
 
@@ -11,7 +11,7 @@
 
 discord-botti scrim-pelien, eli tuttujen kesken pelattavien pelien, missä
 pelaajat jaetaan kahteen joukkueeseen ja joukkueet pelaavat toisiaan vastaan,
-järjestämiseen discord-serverin käyttäjien kesken. botti luo '/setup (peli)'
+järjestämiseen discord-serverin käyttäjien kesken. botti luo '/scrim (peli)'
 -komennolla kutsuttaessa embed-viestin, joka toimii botin käyttöliittymänä.
 botti tunnistaa kutsutun pelin sisäisestä kirjastosta ja tarkistaa milloin 
 scrimiin on liittynyt tarpeeksi pelaajia. scrim-sessio tukee pelaajana
@@ -77,13 +77,7 @@ pelin pelaajien tilastot järjestettynä annetun tilaston mukaan.
 
 ###############################################################################
 
-  -pelit luokkaan muutoksia, joilla tunnistetaan, onko pelissä karttoja ja
-      määritellään miten toimitaan kartan valinnan suhteen. voisi ulottaa
-      myös puolten valintaan ja pick orderiin, jos pelistä niitä löytyy.
-  -suolakerroin (huumoriarvo): Äänestys joukkueen suolaisimmasta pelin jälkeen
-  -fill -argumentti '/teams' -komentoon
-  -Mahdollisuus "tilata" tietyn serverin tietyn pelin scrimit
-  -Mahdollisuus alustaa botin tarvitsevat kanavat admin-komennolla
+  -siirretty long_term_goals_and_to_do -tiedostoon
 
 ###############################################################################
 
