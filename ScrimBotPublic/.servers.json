@@ -1,0 +1,12 @@
+{
+  "630716803869442048": {
+    "lb_default": 25,
+    "roles_setup": 0,
+    "require_setup_permissions": 0,
+    "bot_guild_admins": [],
+    "prefix": 0,
+    "bot_guild_moderators": [],
+    "games_is_whitelist": 0,
+    "games": [ "rocket_league" ]
+  }
+}

@@ -1,7 +1,9 @@
 import discord
 from discord.ext import commands, tasks
+
 import elo_methods
 import scrim_methods
+import main_methods
 
 class EloCog(commands.Cog):
     def __init__(self, client):
@@ -63,6 +65,12 @@ class EloCog(commands.Cog):
             return await scrim_methods.temporary_feedback(ctx, f"Couldn't find the game '{stat_game}'. Type '/help games' for a list of all supported games.")
 
         leaderboard = {}
+
+        if not length:
+            try:
+                length = main_methods.get_server_configs()[str(ctx.message.guild.id)]["lb_default"]
+            except:
+                length = 25
 
         if stat in ("elo", "wins", "losses"):
 

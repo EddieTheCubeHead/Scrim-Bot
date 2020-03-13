@@ -1,7 +1,7 @@
 #################################################################################
 ##
 ##                          scrimbot main module
-##                              beta 0.9.8
+##                              dev 1.1.0
 ##
 #################################################################################
 
@@ -17,7 +17,7 @@ import os
 
 #setup client
 
-client = commands.Bot(command_prefix = "/")
+client = commands.Bot(command_prefix = main_methods.get_prefix, activity =)
 client.remove_command("help")
 
 #setup logging
@@ -64,6 +64,7 @@ async def update(ctx):
         except:
             await scrim_methods.temporary_feedback(ctx, "Couldn't update commands.")
 
+        scrim_methods.Scrim.setup_instances(client)
         scrim_methods.Scrim.participators.clear()
 
 

@@ -56,7 +56,7 @@ Rewriting team management in code.
 
 Scrim usability improvements:
 	- DONE: Delete messages when a scrim is ongoing
-	- Autoprint scrim ip
+	- Autoprint scrim ip (/note can be used, as there isn't currently automatic hosting)
 	- DONE: Automatically terminate a scrim after 15 minutes of no activity
 
 	1.2.0:
@@ -70,6 +70,8 @@ Options methods
 ############################################################################### 
 
 Integrate with a server to actually host the scrims (pipe dream)
+
+Civ V drafting as a part of options
 
 Server-specific options
 	-Larger servers: have a whitelist of user who can setup scrims

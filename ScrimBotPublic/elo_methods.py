@@ -165,7 +165,7 @@ returns True if succesful and False if unsuccesful"""
         """Load supported games from given config
 
 keyword attributes:
-on_startup -- declares if function is called with bot startup (default: False)
+on_startup -- declares if function is called as a part of the bot startup (default: False)
     
 Returns True"""
 
@@ -182,14 +182,24 @@ Returns True"""
             aliases.append(team_game)
             for alias in range(len(config["Games"]["Team"][team_game]["alias"])):
                 aliases.append(config["Games"]["Team"][team_game]["alias"][alias])
-            vars()[team_game] = Team(config["Games"]["Team"][team_game]["playerreq"], team_game, config["Games"]["Team"][team_game]["dispname"], config["Games"]["Team"][team_game]["icon"], int(config["Games"]["Team"][team_game]["colour"], 16), *aliases)
+
+            vars()[team_game] = Team(config["Games"]["Team"][team_game]["playerreq"],
+                                     team_game, config["Games"]["Team"][team_game]["dispname"],
+                                     config["Games"]["Team"][team_game]["icon"],
+                                     int(config["Games"]["Team"][team_game]["colour"], 16),
+                                     *aliases)
 
         for ffa_game in config["Games"]["FFA"]:
             aliases = []
             aliases.append(ffa_game)
             for alias in range(len(config["Games"]["FFA"][ffa_game]["alias"])):
                 aliases.append(config["Games"]["FFA"][ffa_game]["alias"][alias])
-            vars()[ffa_game] = FFA(config["Games"]["FFA"][ffa_game]["maxplayers"], ffa_game, config["Games"]["FFA"][ffa_game]["dispname"], config["Games"]["FFA"][ffa_game]["icon"], int(config["Games"]["FFA"][ffa_game]["colour"], 16), *aliases)
+
+            vars()[ffa_game] = FFA(config["Games"]["FFA"][ffa_game]["maxplayers"],
+                                   ffa_game, config["Games"]["FFA"][ffa_game]["dispname"],
+                                   config["Games"]["FFA"][ffa_game]["icon"],
+                                   int(config["Games"]["FFA"][ffa_game]["colour"], 16),
+                                   *aliases)
 
         for game in self.instances:
             game.load(on_startup)

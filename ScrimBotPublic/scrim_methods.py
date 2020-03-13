@@ -52,6 +52,11 @@ participators -- tracks all participators in all scrims"""
         self.notes = []
         self.option_embeds = {}
         self.instances.append(self)
+        try:
+            self.server = main_methods.get_server_configs()[str(passtru.guild.id)]
+        except:
+            print(str(passtru.guild.id))
+            self.server = None
         if passtru.category:
             if passtru.category.voice_channels:
                 for v in passtru.category.voice_channels:
