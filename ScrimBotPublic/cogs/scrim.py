@@ -270,7 +270,7 @@ class ScrimCog(commands.Cog):
         
     @commands.command(aliases=['s'])
     @commands.guild_only()
-    async def scrim(self, ctx, game=None):
+    async def scrim(self, ctx, game=None, dont_delete=None):
 
         current = await scrim_methods.get_scrim(ctx)
         if not current:
@@ -296,6 +296,9 @@ class ScrimCog(commands.Cog):
             return await scrim_methods.temporary_feedback(ctx, f"Couldn't find the game '{game}'. Type '/help games' for a list of all supported games.")
 
         await current.reset()
+
+        if dont_delete:
+            current.dont_delete = True
 
         current.game = game
         current.get_options()
@@ -1037,7 +1040,20 @@ class ScrimCog(commands.Cog):
     @tasks.loop(minutes=1)
     async def delete_idle_scrims(self):
         for scrim in scrim_methods.Scrim.instances:
-            if scrim.last_interaction > 20 and scrim.phase == "setup":
+            if scrim.dont_delete:
+                return None
+            if scrim.server:
+                if scrim.server["delete_inactive"] and scrim.last_interaction > scrim.server["delete_time_mins"] and scrim.phase == "setup":
+                    scrim.embed.description = f"Scrim terminated"
+                    footertemp = "f"
+                    scrim.embed.clear_fields()
+                    scrim.embed.set_footer(text=footertemp)
+                    await scrim.message.edit(embed=scrim.embed)
+                    await scrim.message.clear_reactions()
+                    await scrim.reset()
+                    return None
+
+            elif scrim.last_interaction > 20 and scrim.phase == "setup":
                 scrim.embed.description = f"Scrim terminated"
                 footertemp = "f"
                 scrim.embed.clear_fields()
@@ -1045,6 +1061,7 @@ class ScrimCog(commands.Cog):
                 await scrim.message.edit(embed=scrim.embed)
                 await scrim.message.clear_reactions()
                 await scrim.reset()
+                return None
 
     @commands.Cog.listener()
     async def on_message(self, ctx):

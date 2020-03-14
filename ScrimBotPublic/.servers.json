@@ -7,6 +7,9 @@
     "prefix": 0,
     "bot_guild_moderators": [],
     "games_is_whitelist": 0,
-    "games": [ "rocket_league" ]
+    "games": [ "rocket_league" ],
+    "delete_inactive": 1,
+    "delete_time_mins": 1,
+    "delete_msgs_in_scrim":  1
   }
 }

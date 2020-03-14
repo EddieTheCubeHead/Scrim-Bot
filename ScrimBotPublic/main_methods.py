@@ -57,3 +57,4 @@ async def get_prefix(bot, ctx_msg):
     return "/"
 
 async def get_member_type(ctx):
+    pass

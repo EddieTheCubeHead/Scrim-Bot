@@ -33,28 +33,28 @@ manually setup teams with the reaction UI, or use one of the many supported
 automatic or semi-automatic commands to setup a team.
 
 The commands for teams selection all start with '/teams' after that you can specify
-the criteria by which the teams are decided by. '/teams shuffle' is the most self-
-esplanatory method, literally shuffling the current players into two teams.
+the criteria by which the teams are decided with. '/teams shuffle' is the most self-
+exsplanatory method, literally shuffling the current players into two teams.
 '/teams balanced' takes advantage of the integrated elo-system, going through all
 team combinations and choosing the one that has the winrate prediction closest to
 50% for either team. '/teams balancedrandom (thershold)' is almost the same as 
 balanced, but users can specify a threshold (default=5) and the bot takes a random
-team combination which winrate prediction falls within the treshold of 50%, so that
+team combination where winrate prediction is at max the specified threshold away from 50%, so that
 the default thershold yield winrates between 45% and 55%. If the players don't like
 the current teams, '/teams clear' moves all players back to unassigned.
 
-With the '/teams pickup' the scrim can be transformed into a pickup game. By default
-the captains are assigned as two of the highest ranked players. But the way captains
-are chosen can be changed with '/teams pickup (criteria)' as either 'choose' or 'random',
+With the '/teams pickup' the scrim can be transformed into a pickup game. By default two of 
+the highest ranked players are assigned as captains, but the way captains
+are chosen can be changed with '/teams pickup (criteria)' to either 'choose' or 'random',
 both of which should be self-explanatory. Once the captains have been chosen they can
-pick players from the unassigned players pool with '/pick' and mentioning the desired
+pick players from the unassigned player pool with '/pick' and mentioning the desired
 player. The picking order is ABBAABBA ('fair') by default, but can also be changed
 with an argument, so that '/teams pickup choose classic' let's you choose two captains,
 that pick players in the classic ABABABAB order. '/teams clear' resets the pickup game
 back into the default team selection process.
 
 Once the teams are ready, the command '/start' starts the scrim. If the channel the 
-scrim is setup in is in a category that also has voice channels "Team 1" and "Team 2",
+scrim is setup in is in a category that also has at least two voice channels,
 the bot will wait for all players to join some voice channel (this is to prevent errors)
 and then move the teams to correct voice channels. This behavior can be prevented by 
 adding a "novoice" -argument to the start command ('/start novoice'). Regardless of
@@ -67,7 +67,8 @@ the statistics it can be prevented with adding another argument to the command.
 
 The bot can be updated with '/update'. This will update the internal game list
 and the cog-modules. This can bee useful if the server wishes to play a game
-that is not currently supported, or for developement purposes.
+that is not currently supported, or for developement purposes. It also resets
+the bot in case a problem appears.
 
 ###############################################################################
 
@@ -111,6 +112,7 @@ with '/leaderboard (game) (statistic)'.
 ###############################################################################
 
   1.0.0 -- 02.02.2020
+
     -The development was on a slow burn for a while due to studies. Small bugfixes
 	done based on usage with friends have however made the bot stable enough to be
 	called ready.
@@ -124,6 +126,7 @@ with '/leaderboard (game) (statistic)'.
 		-An unlocked scrim will now self-terminate after 15 minutes of inactivity
 
   beta 0.9.8 -- 5.11.2019
+
 	-Cleaning up the code with better commenting, docstings, more readable variable
 	names, more functions etc.
 	-Assigning a master user to every scrim to prevent running conflicting commands

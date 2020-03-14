@@ -52,6 +52,7 @@ participators -- tracks all participators in all scrims"""
         self.notes = []
         self.option_embeds = {}
         self.instances.append(self)
+        self.dont_delete = False
         try:
             self.server = main_methods.get_server_configs()[str(passtru.guild.id)]
         except:
@@ -74,6 +75,9 @@ participators -- tracks all participators in all scrims"""
         for p in list(self.player_backup) + self.spectators:
             Scrim.participators.discard(p)
 
+        print(Scrim.participators)
+                
+
         self.player_backup.clear()
         self.players.clear()
         self.team1.clear()
@@ -87,6 +91,7 @@ participators -- tracks all participators in all scrims"""
         self.notes.clear()
         await self.delete_option_embeds()
         self.option_embeds = {}
+        self.dont_delete = False
 
     def get_options(self):
         if not self.game:
@@ -140,10 +145,11 @@ returns a string with the players' display names."""
 
         """Clears both teams for a given scrim and moves all players to unassigned."""
 
-        self.players = list(self.player_backup)
+        self.players.clear()
         self.team1.clear()
         self.team2.clear()
         self.caps.clear()
+        self.players = list(self.player_backup)
 
     def move_to(self, player, destination="players"):
     

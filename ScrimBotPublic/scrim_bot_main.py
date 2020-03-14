@@ -17,7 +17,7 @@ import os
 
 #setup client
 
-client = commands.Bot(command_prefix = main_methods.get_prefix, activity =)
+client = commands.Bot(command_prefix = main_methods.get_prefix)
 client.remove_command("help")
 
 #setup logging

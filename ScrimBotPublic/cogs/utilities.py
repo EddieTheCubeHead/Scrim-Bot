@@ -77,7 +77,6 @@ class UtilitiesCog(commands.Cog):
                             break
                 else:
                     await ctx.message.guild.create_role(name = game_dict["Games"][category][game]["dispname"],
-
                                                         #getting the hex values of the color from the game dictionary's color value:
                                                         colour = discord.Color.from_rgb(int(game_dict["Games"][category][game]["colour"][2:4], 16),
                                                                                         int(game_dict["Games"][category][game]["colour"][4:6], 16),
