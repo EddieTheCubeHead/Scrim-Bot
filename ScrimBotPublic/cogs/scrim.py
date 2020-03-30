@@ -25,7 +25,7 @@ class ScrimCog(commands.Cog):
 
     @commands.Cog.listener()
     async def on_reaction_add(self, react, user):
-    
+
         current = await scrim_methods.get_scrim(react)
         if not current:
             return None
@@ -1008,7 +1008,7 @@ class ScrimCog(commands.Cog):
         if not current:
             return await scrim_methods.temporary_feedback(ctx, "You cannot do that on this channel.")
     
-        if ctx.message.author.guild_permissions.administrator == False and ctx.message.author.id != "162882518381494272":
+        if ctx.message.author.guild_permissions.administrator == False and ctx.message.author.id != "162882518381494272" and current.master != ctx.message.author:
             return await scrim_methods.temporary_feedback(ctx, "You need admin permissions to use that command.")
 
         if current.phase == "no scrim":
@@ -1040,6 +1040,7 @@ class ScrimCog(commands.Cog):
     @tasks.loop(minutes=1)
     async def delete_idle_scrims(self):
         for scrim in scrim_methods.Scrim.instances:
+
             if scrim.dont_delete:
                 return None
             if scrim.server:

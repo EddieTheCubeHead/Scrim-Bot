@@ -72,11 +72,8 @@ participators -- tracks all participators in all scrims"""
         self.game = None
         self.phase = "no scrim"
         self.master = None
-        for p in list(self.player_backup) + self.spectators:
-            Scrim.participators.discard(p)
-
-        print(Scrim.participators)
-                
+        for p in self.players + list(self.player_backup) + self.spectators:
+            self.participators.discard(p)
 
         self.player_backup.clear()
         self.players.clear()

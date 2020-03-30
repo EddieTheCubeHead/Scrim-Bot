@@ -1,15 +1,1 @@
-{
-  "630716803869442048": {
-    "lb_default": 25,
-    "roles_setup": 0,
-    "require_setup_permissions": 0,
-    "bot_guild_admins": [],
-    "prefix": 0,
-    "bot_guild_moderators": [],
-    "games_is_whitelist": 0,
-    "games": [ "rocket_league" ],
-    "delete_inactive": 1,
-    "delete_time_mins": 1,
-    "delete_msgs_in_scrim":  1
-  }
-}
+{"630716803869442048": {"lb_default": 25, "roles_setup": true, "role_signup_message": 694285149046571048, "require_setup_permissions": false, "bot_guild_admins": [], "prefix": null, "bot_guild_moderators": [], "games_is_whitelist": false, "games": [], "delete_inactive": true, "delete_time_mins": 20, "delete_msgs_in_scrim": true}}
