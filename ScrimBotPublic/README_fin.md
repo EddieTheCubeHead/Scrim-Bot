@@ -1,7 +1,7 @@
 ###############################################################################
 
                      scrimbotti 1.1.0, kehittäjäversio
-							    07.11.2019
+							    01.04.2020
 
 ###############################################################################
 
@@ -70,6 +70,21 @@ moduulissa.
 peliin annetuksi arvoksi ja '/leaderboard (peli) (tilasto)' näyttää annetun
 pelin pelaajien tilastot järjestettynä annetun tilaston mukaan.
 
+###############################################################################
+
+				               roolijärjestelmä
+
+###############################################################################
+
+Botissa on sisäänrakennettuna mahdollisuus yhdellä komennolla luoda serverille
+roolijärjestelmä sisäisen pelilistan pohjalta. "/setup_roles" -komento, joka on
+käytössä vain serverin admin-käyttäjille luo roolin ja emojin jokaiselle botin
+tukemalle pelille, mikäli serverillä ei jo ole sellaista, ja käyttäjän halutessa
+luo vielä uuden kategorian ja kanavan automoidulle roolinasetukselle. Tällä kanavalla
+on vain botin luoma embed-viesti, johon botti alustaa kaikki peliemojit reaktiona
+ja käyttäjät voivat lisätä ja poistaa itseltään rooleja lisäämällä ja poistamalla
+vastaavan pelin reaktioita. Kaikki ei-bottikäyttäjien viestit kyseisellä kanavalla
+poistetaan automaattisesti.
 
 ###############################################################################
 
@@ -86,20 +101,22 @@ pelin pelaajien tilastot järjestettynä annetun tilaston mukaan.
 ###############################################################################
 
   1.0.0 -- 02.02.2020
+
     -Koulutöiden vuoksi projekti sivuroolissia pitkän aikaa, suuria muutoksia ei
 	ole tehty, mutta käytön myötä ilmenneitä bugeja korjattu tarpeeksi, jotta
 	botti tuntuu vakaalta ja valmiilta.
-		-Tiimien muokkaus uudelleenkirjoitettava 1.1.0: tällö hetkellä botti voi
+		-Tiimien muokkaus uudelleenkirjoitettava 1.1.0: tällä hetkellä botti voi
 		mennä jumiin, jos suorituksessa tulee ongelma kesken tiimien muokkauksen, jättäen
 		puolivalmiita listoja muuttujiin ja pakottaen uudelleenkäynnistyksen
 		muuttujien tyhjentämiseksi.
-	-Pieniä käytettävyysparannuksia ja pohjakoodi asetukset systeemille (1.2.0?)
+	-Pieniä käytettävyysparannuksia ja pohjakoodi asetukset-systeemille (1.2.0?)
 		-Aktiivinen scrim estää viestin lähettämisen kanavalle
 		-/note tämä kiertämiseksi
 		-Lukitsemattomat scrimit terminoidaan viidentoista minuutin jälkeen. Ajastin
 		uudelleenkäynnistetään kaikissa interaktioissa
 
   beta 0.9.8 -- 5.11.2019
+
 	-Koko koodin siistintä kommentteilla, docstringeillä, selkeämmillä muuttujilla
 	ja uusilla funktioilla
 	-Joka scrimillä on nyt mestarikäyttäjä, eli scrimin luoja. Vain mestarikäyttäjä

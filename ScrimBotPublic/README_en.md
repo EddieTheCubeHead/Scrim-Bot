@@ -99,6 +99,22 @@ with '/leaderboard (game) (statistic)'.
 
 ###############################################################################
 
+			    	role system and automated signup channel
+
+###############################################################################
+
+The bot has an integrated system for automatic role- and signup -system creation
+with a single command. Server admins can use the '/setup_roles' -command to have
+the bot automatically detect all supported games and create roles and emojis for
+every single one of them. or reuse existing ones on the server. Then the bot prompts
+the user if they want to create an automated signup channel. Answering 'yes' will 
+have the bot create a new category and channel and send a message in that channel
+with all game emojis as reactions. Users can add or remove reactions to that message
+to add or remove game roles from themselves. Additionally all non-bot messages on
+that channel will get automatically deleted.
+
+###############################################################################
+
                                    ideas
 
 ###############################################################################

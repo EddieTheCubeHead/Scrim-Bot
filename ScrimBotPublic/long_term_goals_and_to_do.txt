@@ -78,6 +78,8 @@ Flesh out error handling with checks and @command.error
 
 Rewrite pickup-games (see long-term plans and goals)
 
+Skill bracket system
+
 ###############################################################################
 
 						  long term plans and goals
