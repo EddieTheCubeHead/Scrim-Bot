@@ -273,7 +273,7 @@ returns None"""
     await tempmsg.delete(delay=delay)
     return None
 
-async def get_scrim(ctx, *, check_master=False, send_feedback=True):
+async def get_scrim(ctx, *, send_feedback=True):
 
         """Get the instance of Scrim associated with context's (ctx) channel.
         
@@ -281,7 +281,6 @@ arguments:
 ctx -- context message or reaction
 
 keyword arguments:
-check_master -- bool, if True, checks if context author is the master of the current scrim. (default: False)
 send_feedback -- bool, if True, sends verbal feedback on errors.
 
 returns an instance of scrim if successful, None if it failed to find a scrim or a master."""
@@ -294,14 +293,8 @@ returns an instance of scrim if successful, None if it failed to find a scrim or
         for channel in Scrim.instances:
             try:
                 if ctx_id == channel.id:
-                    if check_master and (ctx.message.author != channel.master and ctx.message.author.id not in main_methods.get_configs()["admins"]):
-                        if send_feedback:
-                            return await temporary_feedback(ctx, "Only the person who set up the scrim or is a bot admin can manage it.")
-                        else:
-                            return None
-                    else:
-                        channel.last_interaction = 0
-                        return channel
+                    channel.last_interaction = 0
+                    return channel
             except:
                 pass
         else:

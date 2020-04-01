@@ -55,6 +55,3 @@ async def get_prefix(bot, ctx_msg):
     if str(ctx_msg.guild.id) in servers:
         return servers[str(ctx_msg.guild.id)]["prefix"] or "/"
     return "/"
-
-async def get_member_type(ctx):
-    pass

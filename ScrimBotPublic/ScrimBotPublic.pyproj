@@ -28,6 +28,9 @@
     <Compile Include="cogs\utilities.py" />
     <Compile Include="elo_methods.py" />
     <Compile Include="main_methods.py" />
+    <Compile Include="checks.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="option_methods.py" />
     <Compile Include="scrim_bot_main.py" />
     <Compile Include="scrim_methods.py" />
