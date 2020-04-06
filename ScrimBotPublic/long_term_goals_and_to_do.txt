@@ -41,37 +41,94 @@ Get and implement feedback on user-interface (done)
 
   1.1.0:
 
-Bot admin functionality
+Bot admin functionality and server specific settings
 
 Subscribing to scrims
+	-Probably need to implement a (full-ish) role system based on games (done)
+	-Registration message that is created on the same interactive command as roles (done)
+		-Has one message with the roles as reactions. Assigns roles based on reactions. (done)
+	-Automatic detection of existing registration channels/messages on startup (done)
+	-Argument to ping the role of the current scrim's game when creating a scrim (done)
+	-Server-wide setting enable/disable automatic pinging when creating a scrim (default, false) (done)
+	-Command to have the bot ping the role of the scrim's game (done)
+		-This is better than pinging yourself because the message can be easily auto-deleted when the
+		scrim ends and pinging rate can be reduced with a server-wide setting
+
+Rewriting team management in code. 
+	-Take a look at replacing class variable Scrim.participators with a set (done)
+	-Possibly implementing a set of all participating players for each locked 
+	scrim to make duplicating or losing participators of a specific scrim impossible (done)
+	-Test the changed code for bugs
+		-Squash them all (most glaring ones fixed)
+	-Possibly implement better error management for Scrim.set_missing_elos (should ideally tell
+	which player caused the problem) (done)
 
 Scrim usability improvements:
 	- DONE: Delete messages when a scrim is ongoing
-	- Autoprint scrim ip
+	- Autoprint scrim ip (/note can be used, as there isn't currently automatic hosting, done, kinda)
 	- DONE: Automatically terminate a scrim after 15 minutes of no activity
+
+Comment all new code and update documentation
+
+	1.2.0
+
+Options for scrims
+	-Hand written on a per-game basis. Start with cs and dota.
+	-Try to get overwatch and civ5 done as well
+
+Rewrite pickup-games (see long-term plans and goals)
+
+Skill bracket system
+
+Flesh out error handling with checks and @command.error
 
 ###############################################################################
 
 						  long term plans and goals
 
-############################################################################### 
+###############################################################################
+
+Have a look at whether ratings should be moved to a database as well how big
+a task said rewrite would be.
 
 Integrate with a server to actually host the scrims (pipe dream)
+
+Civ V drafting as a part of options
+
+Server-specific options
+	-Larger servers: have a whitelist of user who can setup scrims (done)
+	-Custom prefix for servers (done)
+	-Change the default length of leaderboards displayed (done)
+
+Rewrite pickup games for fuller support for things like choosing starting cap and
+allowing to pass strings such as ABABBABA to enable fully customized picking order
 
 Map-, side-, first pick-, etc. assigning with the bot
 
 Implement functionality for FFA and 1v1 (tournament) games.
 	-Tournament support for team-based games
+		-Later tournaments/leagues for team-based games on a team basis
 
 Implement admin functionality for the bot independent from server admins both
 on a server- basis and on a global basis.
-	-Add option for servers to toggle if server admin == bot admin
+	-Add option for servers to toggle if server admin == bot admin (done)
+		-Actually implement a command to change that prefix
 
-Add support for configurable command prefixes
+Add support for configurable command prefixes (done)
+	-Actually implement a command to set the prefix on a server
 
 MVP and salt king votes after a scrim
 
-Automatically terminate a scrim after x minutes if no activity
+Automatically terminate a scrim after x minutes if no activity (done)
 
-Delete all messages added to a channel setting up a scrim after x seconds.
-	Maybe toggleable?
+Delete all messages added to a channel setting up a scrim after x seconds. (done)
+	-Implement better workarounds for urgent messages such as links to servers etc.
+	-Possibly implement a toggle command?
+
+Small rework for file structure and module naming
+
+############################################################################### 
+
+						       user feedback
+
+############################################################################### 

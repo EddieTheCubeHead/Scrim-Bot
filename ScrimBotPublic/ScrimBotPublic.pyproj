@@ -4,8 +4,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>2270dda9-19a2-43fd-8eb5-30180abb9721</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>
-    </StartupFile>
+    <StartupFile>scrim_bot_main.py</StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
@@ -29,6 +28,9 @@
     <Compile Include="cogs\utilities.py" />
     <Compile Include="elo_methods.py" />
     <Compile Include="main_methods.py" />
+    <Compile Include="checks.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="option_methods.py" />
     <Compile Include="scrim_bot_main.py" />
     <Compile Include="scrim_methods.py" />
@@ -41,6 +43,7 @@
     <Content Include=".games.json" />
     <Content Include=".gitattributes" />
     <Content Include=".gitignore" />
+    <Content Include=".servers.json" />
     <Content Include="cogs\__pycache__\elo.cpython-37.pyc" />
     <Content Include="cogs\__pycache__\help.cpython-37.pyc" />
     <Content Include="cogs\__pycache__\scrim.cpython-37.pyc" />

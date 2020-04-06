@@ -1,11 +1,11 @@
 ###############################################################################
 
-                             scrimbot beta0.9.8
-							      07.11.2019
+                              scrimbot 1.1.0
+							    06.04.2019
 
 ###############################################################################
 
-							about the documentation
+						  about the documentation
 
 ###############################################################################
 
@@ -21,7 +21,7 @@ a personal project diary.
 
 A discord bot for setting up friendly scrims, or friendly matches where predecided 
 teams play against each other, among the members of a server. The bot creates
-an embed message serving as the main user interface with the '/setup (game)'
+an embed message serving as the main user interface with the '/scrim (game)'
 -command. The bot gets supported games from the .games json file and displays
 correct logo, name etc. based on the info on the file. Based on the game, the 
 bot keeps track of how many more players need to join. Joining as a spectator is
@@ -33,28 +33,28 @@ manually setup teams with the reaction UI, or use one of the many supported
 automatic or semi-automatic commands to setup a team.
 
 The commands for teams selection all start with '/teams' after that you can specify
-the criteria by which the teams are decided by. '/teams shuffle' is the most self-
-esplanatory method, literally shuffling the current players into two teams.
+the criteria by which the teams are decided with. '/teams shuffle' is the most self-
+exsplanatory method, literally shuffling the current players into two teams.
 '/teams balanced' takes advantage of the integrated elo-system, going through all
 team combinations and choosing the one that has the winrate prediction closest to
 50% for either team. '/teams balancedrandom (thershold)' is almost the same as 
 balanced, but users can specify a threshold (default=5) and the bot takes a random
-team combination which winrate prediction falls within the treshold of 50%, so that
+team combination where winrate prediction is at max the specified threshold away from 50%, so that
 the default thershold yield winrates between 45% and 55%. If the players don't like
 the current teams, '/teams clear' moves all players back to unassigned.
 
-With the '/teams pickup' the scrim can be transformed into a pickup game. By default
-the captains are assigned as two of the highest ranked players. But the way captains
-are chosen can be changed with '/teams pickup (criteria)' as either 'choose' or 'random',
+With the '/teams pickup' the scrim can be transformed into a pickup game. By default two of 
+the highest ranked players are assigned as captains, but the way captains
+are chosen can be changed with '/teams pickup (criteria)' to either 'choose' or 'random',
 both of which should be self-explanatory. Once the captains have been chosen they can
-pick players from the unassigned players pool with '/pick' and mentioning the desired
+pick players from the unassigned player pool with '/pick' and mentioning the desired
 player. The picking order is ABBAABBA ('fair') by default, but can also be changed
 with an argument, so that '/teams pickup choose classic' let's you choose two captains,
 that pick players in the classic ABABABAB order. '/teams clear' resets the pickup game
 back into the default team selection process.
 
 Once the teams are ready, the command '/start' starts the scrim. If the channel the 
-scrim is setup in is in a category that also has voice channels "Team 1" and "Team 2",
+scrim is setup in is in a category that also has at least two voice channels,
 the bot will wait for all players to join some voice channel (this is to prevent errors)
 and then move the teams to correct voice channels. This behavior can be prevented by 
 adding a "novoice" -argument to the start command ('/start novoice'). Regardless of
@@ -67,7 +67,8 @@ the statistics it can be prevented with adding another argument to the command.
 
 The bot can be updated with '/update'. This will update the internal game list
 and the cog-modules. This can bee useful if the server wishes to play a game
-that is not currently supported, or for developement purposes.
+that is not currently supported, or for developement purposes. It also resets
+the bot in case a problem appears.
 
 ###############################################################################
 
@@ -98,15 +99,38 @@ with '/leaderboard (game) (statistic)'.
 
 ###############################################################################
 
+			    	role system and automated signup channel
+
+###############################################################################
+
+The bot has an integrated system for automatic role- and signup -system creation
+with a single command. Server admins can use the '/setup_roles' -command to have
+the bot automatically detect all supported games and create roles and emojis for
+every single one of them. or reuse existing ones on the server. Then the bot prompts
+the user if they want to create an automated signup channel. Answering 'yes' will 
+have the bot create a new category and channel and send a message in that channel
+with all game emojis as reactions. Users can add or remove reactions to that message
+to add or remove game roles from themselves. Additionally all non-bot messages on
+that channel will get automatically deleted.
+
+###############################################################################
+
+                                 settings
+
+###############################################################################
+
+The bot supports server-specific settings. Some of these include custom prefixes,
+black/whitelisting games and restricting users who can setup scrims. Settings can
+be viewed with '/settings' and modified with '/settings (setting) (value)'. More
+info can be found with '/help settings'
+
+###############################################################################
+
                                    ideas
 
 ###############################################################################
 
-  -map, side, first pick etc. selection
-  -Votes for the mvp and the saltiest player after a game.
-  -fill -argument for the '/teams' -command
-  -A feature for subscribing to a certain game on a certain server
-  -A feature for setting up all the needed channels with one adming command
+  -This has been moved to long_term_goals_and_to_do
 
 ###############################################################################
 
@@ -114,7 +138,30 @@ with '/leaderboard (game) (statistic)'.
 
 ###############################################################################
 
+  1.1.0 -- 06.04.2020
+
+    -Added a role system for the supported games
+		-Added the '/setup_role' -command to automatically implement said system
+	-Added server-specific, configurable settings.
+		-Added commands for viewing and modifying settings.
+	-Found out about the checks -system of the discord.py API and implemented it
+    
+  1.0.0 -- 02.02.2020
+
+    -The development was on a slow burn for a while due to studies. Small bugfixes
+	done based on usage with friends have however made the bot stable enough to be
+	called ready.
+		-The management of teams in the code needs to be rewritten for 1.1.0, at
+		the moment if the execution halts during a function handling team lists
+		the bot will be left with multiple half-filled lists in variables, requiring
+		a restart to reset the said variables.
+	-Small usability improvements and base code for options -system (1.2.0?)
+		-An active scrim will now delete all messages on a channel
+		-/note to prevent said behaviour
+		-An unlocked scrim will now self-terminate after 15 minutes of inactivity
+
   beta 0.9.8 -- 5.11.2019
+
 	-Cleaning up the code with better commenting, docstings, more readable variable
 	names, more functions etc.
 	-Assigning a master user to every scrim to prevent running conflicting commands
@@ -124,7 +171,7 @@ with '/leaderboard (game) (statistic)'.
 
 	-Cogs -implementation left some functions tied to the Scrim-class homeless.
 	These have been moved to the scrim_methods module.
-		-elo_module renamed to elo_methods to preserver the naming scheme
+		-elo_module renamed to elo_methods to preserve the naming scheme
 		-This fixed a bug in '/update' that wiped out all supported games
 
   beta 0.9.7 -- 31.10.2019

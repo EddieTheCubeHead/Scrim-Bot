@@ -1,12 +1,24 @@
 import discord
 from discord.ext import commands, tasks
-import os
+
+
 import elo_methods
 import scrim_methods
+import main_methods
+
+import os
 import json
 import itertools
 import random
 import asyncio
+import checks
+
+#################################################################################
+##
+##The most important cog of the bot. Houses the commands and listeners that deal
+##with setting up and managing scrims.
+##
+#################################################################################
 
 class ScrimCog(commands.Cog):
     def __init__(self, client):
@@ -25,7 +37,7 @@ class ScrimCog(commands.Cog):
 
     @commands.Cog.listener()
     async def on_reaction_add(self, react, user):
-    
+
         current = await scrim_methods.get_scrim(react)
         if not current:
             return None
@@ -72,8 +84,8 @@ class ScrimCog(commands.Cog):
                 if user in current.participators:
                     await react.remove(user)
                     return None
-
-                current.add_user(user, "spectators")
+                else:
+                    current.add_user(user, "spectators")
 
                 current.embed.set_field_at(1, name="**Spectators**", value=current.get_formatted_members("spectators"), inline=True)
                 await current.message.edit(embed=current.embed)
@@ -270,7 +282,8 @@ class ScrimCog(commands.Cog):
         
     @commands.command(aliases=['s'])
     @commands.guild_only()
-    async def scrim(self, ctx, game=None):
+    @checks.scrim_eligible()
+    async def scrim(self, ctx, game=None, dont_delete=None):
 
         current = await scrim_methods.get_scrim(ctx)
         if not current:
@@ -284,6 +297,11 @@ class ScrimCog(commands.Cog):
 
         for team_game in elo_methods.Team.instances:
             if game in team_game.alias['alias']:
+                if current.server:
+                    if (current.server["games_is_whitelist"] == 0) and (team_game.dispname in current.server["games"]):
+                        return await scrim_methods.temporary_feedback(ctx, f"The game '{game}' is not allowed on this server.")
+                    elif (current.server["games_is_whitelist"] == 1) and (team_game.dispname not in current.server["games"]):
+                        return await scrim_methods.temporary_feedback(ctx, f"The game '{game}' is not allowed on this server.")
                 game = team_game
                 break
 
@@ -291,6 +309,9 @@ class ScrimCog(commands.Cog):
             return await scrim_methods.temporary_feedback(ctx, f"Couldn't find the game '{game}'. Type '/help games' for a list of all supported games.")
 
         await current.reset()
+
+        if dont_delete:
+            current.dont_delete = True
 
         current.game = game
         current.get_options()
@@ -306,6 +327,54 @@ class ScrimCog(commands.Cog):
         await current.message.add_reaction(emoji = "\U0001F3AE")    #video game controller
         await current.message.add_reaction(emoji = "\U0001F441")    #eye
 
+        # ping the correct role, if the setting is enabled
+        if current.server:
+            if current.server["ping_game_role"]:
+                for role in ctx.guild.roles:
+                    if role.name == current.game.dispname:
+                        ping = role.mention
+                        return await scrim_methods.temporary_feedback(ctx, ping, delay=180)
+                return await scrim_methods.temporary_feedback(ctx, "Couldn't find a role for the game of the current scrim.")
+
+    @scrim.error
+    async def scrim_error(self, ctx, error):
+        if isinstance(error, checks.InadequatePermissions):
+            return await scrim_methods.temporary_feedback(ctx, error)
+
+#################################################################################
+##
+##             Command for pinging the role of the scrim's game
+##
+#################################################################################
+
+    @commands.command()
+    @commands.cooldown(1, 180, commands.BucketType.channel)
+    @commands.guild_only()
+    async def ping(self, ctx):
+        current = await scrim_methods.get_scrim(ctx)
+        if not current:
+            return None
+
+        if current.server:
+            print(current.server)
+
+        elif not current.server or not current.server["roles_setup"]:
+            return await scrim_methods.temporary_feedback(ctx, "Pinging for players is only supported on servers that have setup the role system.")
+
+        elif current.phase != "setup":
+            return await scrim_methods.temporary_feedback(ctx, "You can only ping users if there is a scrim currently looking for players.")
+
+        for role in ctx.guild.roles:
+            if role.name == current.game.dispname:
+                ping = role.mention
+                return await scrim_methods.temporary_feedback(ctx, ping, delay=180)
+        return await scrim_methods.temporary_feedback(ctx, "Couldn't find a role for the game of the current scrim.")
+
+    @ping.error
+    async def ping_error(self, ctx, error):
+        if isinstance(error, commands.CommandOnCooldown):
+            return await scrim_methods.temporary_feedback(ctx, "Command on cooldown.")
+
 #################################################################################
 ##
 ##                   Command for locking a scrim's players
@@ -314,9 +383,10 @@ class ScrimCog(commands.Cog):
 
     @commands.command(aliases=['l'])
     @commands.guild_only()
+    @checks.scrim_master()
     async def lock(self, ctx):
 
-        current = await scrim_methods.get_scrim(ctx, check_master=True)
+        current = await scrim_methods.get_scrim(ctx)
         if not current:
             return None
 
@@ -333,6 +403,7 @@ class ScrimCog(commands.Cog):
             current.phase = "locked"
             current.embed.description = "Players locked. Use reactions for manual team selection or type '**/teams** _random/balanced/balancedrandom_' to define teams automatically."
             current.players = current.players[:current.game.playerreq] #remove extra players
+            current.player_backup = set(current.players)
 
             await current.message.clear_reactions()   
             await current.message.add_reaction("1\u20E3")   #keycap 1
@@ -346,6 +417,11 @@ class ScrimCog(commands.Cog):
             await current.message.edit(embed=current.embed)
             await ctx.message.delete()
 
+    @lock.error
+    async def lock_error(self, ctx, error):
+        if isinstance(error, checks.NotScrimMaster):
+            return await scrim_methods.temporary_feedback(ctx, error)
+
 #################################################################################
 ##
 ##teams -group let's participators automate assignment of team baced on a criteria
@@ -354,13 +430,19 @@ class ScrimCog(commands.Cog):
         
     @commands.group(aliases=['t','team'])
     @commands.guild_only()
+    @checks.scrim_master()
     async def teams(self, ctx):
 
         if ctx.invoked_subcommand is None:
-            current = await scrim_methods.get_scrim(ctx, check_master=True)
+            current = await scrim_methods.get_scrim(ctx)
             if not current:
                 return None
             return await scrim_methods.temporary_feedback(ctx, "Invalid subcommand for command 'teams'. Please  type '/help teams' for a list of commands.")
+
+    @teams.error
+    async def teams_error(self, ctx, error):
+        if isinstance(error, checks.NotScrimMaster):
+            return await scrim_methods.temporary_feedback(ctx, error)
         
 #################################################################################
 ##
@@ -371,7 +453,7 @@ class ScrimCog(commands.Cog):
     @teams.command(aliases=['random', 'r', 's'])
     async def shuffle(self, ctx):
 
-        current = await scrim_methods.get_scrim(ctx, check_master=True)
+        current = await scrim_methods.get_scrim(ctx)
         if not current:
             return None
 
@@ -405,9 +487,9 @@ class ScrimCog(commands.Cog):
 #################################################################################
 
     @teams.command(aliases=['pug'])
-    async def pickup(sm, ctx, cap="balanced", order="fair"):
+    async def pickup(self, ctx, cap="balanced", order="fair"):
 
-        current = await scrim_methods.get_scrim(ctx, check_master=True)
+        current = await scrim_methods.get_scrim(ctx)
         if not current:
             return None
 
@@ -445,20 +527,10 @@ class ScrimCog(commands.Cog):
 
         elif cap == "balanced":
 
-            current.set_missing_elos()
+            await current.set_missing_elos(ctx)
 
             highest_elo = 0
             second_elo = 0
-
-            for p in current.players:
-                try:
-                    current.game.players[str(p.id)]
-                except:
-                    if current.game.addelo(str(p.id), 1800):
-                        await scrim_methods.temporary_feedback(ctx, f"Didn't find existing elo statistics for user {p.diplay_name}. They have been assigned the default elo value (1800).")
-                    else:
-                        return await scrim_methods.temporary_feedback(ctx, f"Unexpected error while trying to set default elo value for user {p.diplay_name}. Could not proceed with current operation.")
-
 
             for player in current.players:
 
@@ -560,7 +632,7 @@ class ScrimCog(commands.Cog):
     @teams.command(aliases=['b'])
     async def balanced(self, ctx):
     
-        current = await scrim_methods.get_scrim(ctx, check_master=True)
+        current = await scrim_methods.get_scrim(ctx)
         if not current:
             return None
 
@@ -568,20 +640,18 @@ class ScrimCog(commands.Cog):
             return await scrim_methods.temporary_feedback(ctx, "You cannot do that now.")
 
         current.clear_teams()
-
-        for p in current.players:
-            try:
-                current.game.players[str(p.id)]
-            except:
-                if current.game.addelo(str(p.id), 1800):
-                    await scrim_methods.temporary_feedback(ctx, f"Didn't find existing elo statistics for user {p.display_name}. They have been assigned the default elo value (1800).")
-                else:
-                    return scrim_methods.temporary_feedback(ctx, f"Unexpected error while trying to set default elo value for user {p.diplay_name}. Could not proceed with current operation.")
+        if not await current.set_missing_elos(ctx):
+            return await scrim_methods.temporary_feedback(ctx, "Error when assigning missing elo values to players.")
     
 
         #get a list of ALL possible team combinations for team 1
         teamcomps = list(itertools.combinations(current.players, int(current.game.playerreq/2)))
         closest_winprob = 2
+        dummy_team1 = []
+        dummy_team2 = []
+        # balanced and balancedrandom have been constantly making problems when
+        # encountering a bug. Dummies aim to fix the bot breaking completely if
+        # the function encounters a problem.
     
         for team in teamcomps:
 
@@ -590,17 +660,24 @@ class ScrimCog(commands.Cog):
             for player in team:
                 tester_team.append(player)
 
-            current.team2 = list(set(current.players).difference(tester_team))
+            dummy_team2 = list(set(current.players).difference(tester_team))
 
-            winprob = current.game.winprob(tester_team, current.team2)
+            winprob = current.game.winprob(tester_team, dummy_team2)
 
             if abs(winprob-0.5) < abs(closest_winprob-0.5):
                 closest_winprob = winprob
 
-                current.team1.clear()
-                current.team1 = tester_team
+                dummy_team1.clear()
+                dummy_team1 = tester_team
                         
-        current.team2 = list(set(current.players).difference(current.team1))
+        dummy_team2 = list(set(current.players).difference(dummy_team1))
+
+        if not (len(dummy_team1) == len(dummy_team2) and set(dummy_team1+dummy_team2) == current.player_backup):
+            current.clear_teams()
+            return await scrim_methods.temporary_feedback(ctx, "Unexpected error when assigning teams.")
+
+        current.team1 = dummy_team1
+        current.team2 = dummy_team2
     
         current.players.clear()
         current.embed.set_field_at(0, name="**Unassigned players**", value="_empty_", inline=True)
@@ -621,7 +698,7 @@ class ScrimCog(commands.Cog):
     @teams.command(aliases=['br','balancedrand','brand'])
     async def balancedrandom(self, ctx, threshold=5):
 
-        current = await scrim_methods.get_scrim(ctx, check_master=True)
+        current = await scrim_methods.get_scrim(ctx)
         if not current:
             return None
 
@@ -632,22 +709,27 @@ class ScrimCog(commands.Cog):
             return await scrim_methods.temporary_feedback(ctx, "Threshold out of limits. Please give a value between 1 and 50.")
 
         current.clear_teams()
-        current.set_missing_elos()
-
+        if not await current.set_missing_elos(ctx):
+            return await scrim_methods.temporary_feedback(ctx, "Error when assigning missing elo values to players.")
 
         teamcomps = list(itertools.combinations(current.players, int(current.game.playerreq/2)))
         threshold /= 100
         candidates = []
         smallest_three = []
         values = []
+        dummy_team1 = []
+        dummy_team2 = []
+        # balanced and balancedrandom have been constantly making problems when
+        # encountering a bug. Dummies aim to fix the bot breaking completely if
+        # the function encounters a problem.
     
         for team in teamcomps:
             tester_team = []
             for player in team:
                 tester_team.append(player)
-            current.team2 = list(set(current.players).difference(tester_team))
+            dummy_team2 = list(set(current.players).difference(tester_team))
 
-            winprob = current.game.winprob(tester_team, current.team2)
+            winprob = current.game.winprob(tester_team, dummy_team2)
 
             if len(values) < 3:
                 smallest_three.insert(0, tester_team)
@@ -662,11 +744,18 @@ class ScrimCog(commands.Cog):
                 candidates.append(tester_team)
 
         if len(candidates) >= len(smallest_three):
-            current.team1 = random.choice(candidates)
+            dummy_team1 = random.choice(candidates)
         else:
-            current.team1 = random.choice(smallest_three)
+            dummy_team1 = random.choice(smallest_three)
                         
-        current.team2 = list(set(current.players).difference(current.team1))    
+        dummy_team2 = list(set(current.players).difference(dummy_team1))
+        
+        if not (len(dummy_team1) == len(dummy_team2) and set(dummy_team1+dummy_team2) == current.player_backup):
+            current.clear_teams()
+            return await scrim_methods.temporary_feedback(ctx, "Unexpected error when assigning teams.")
+
+        current.team1 = dummy_team1
+        current.team2 = dummy_team2
 
         current.players.clear()
         current.embed.set_field_at(0, name="**Unassigned players**", value="_empty_", inline=True)
@@ -780,7 +869,7 @@ class ScrimCog(commands.Cog):
     @teams.command(aliases=['c', 'empty', 'e'])
     async def clear(self, ctx):
 
-        current = await scrim_methods.get_scrim(ctx, check_master=True)
+        current = await scrim_methods.get_scrim(ctx)
         if not current:
             return None
 
@@ -808,9 +897,10 @@ class ScrimCog(commands.Cog):
 
     @commands.command()
     @commands.guild_only()
+    @checks.scrim_master()
     async def start(self, ctx, voice="voice"):
 
-        current = await scrim_methods.get_scrim(ctx, check_master=True)
+        current = await scrim_methods.get_scrim(ctx)
         if not current:
             return None
 
@@ -838,7 +928,7 @@ class ScrimCog(commands.Cog):
             else:
                 check += 1
                 current.embed.description = "Scrim underway."
-                footertemp = "Good luck, have fun!"
+                footertemp = "Good luck, have fun! Declare the winner with '**/winner** _team1/team2_'"
 
             for p in current.team2:
                 if p.voice == None:
@@ -854,7 +944,7 @@ class ScrimCog(commands.Cog):
             else:
                 check += 1
                 current.embed.description = "Scrim underway."
-                footertemp = "Good luck, have fun!"
+                footertemp = "Good luck, have fun! Declare the winner with '**/winner** _team1/team2_'"
 
             if check < 2:
             
@@ -905,7 +995,7 @@ class ScrimCog(commands.Cog):
 
  
             current.embed.description = "Scrim underway."
-            footertemp = "Good luck, have fun!"
+            footertemp = "Good luck, have fun! Declare the winner with '**/winner** _team1/team2_'"
             current.embed.set_footer(text=footertemp)
             await current.message.edit(embed=current.embed)
                 
@@ -926,7 +1016,7 @@ class ScrimCog(commands.Cog):
 
             current.phase = "underway"
             current.embed.description = "Scrim underway."
-            footertemp = "Good luck, have fun!"
+            footertemp = "Good luck, have fun! Declare the winner with '**/winner** _team1/team2_'"
             current.embed.set_footer(text=footertemp)
             current.embed.remove_field(0)
             current.embed.set_field_at(2, name="**Team 1**", value=current.get_formatted_members("team1"), inline=True)
@@ -937,6 +1027,11 @@ class ScrimCog(commands.Cog):
         
         else:
             return await scrim_methods.temporary_feedback(ctx, "Unknown value for voice (voice/novoice).")
+
+    @start.error
+    async def start_error(self, ctx, error):
+        if isinstance(error, checks.NotScrimMaster):
+            return await scrim_methods.temporary_feedback(ctx, error)
         
 #################################################################################
 ##
@@ -946,9 +1041,10 @@ class ScrimCog(commands.Cog):
 
     @commands.command(aliases=['victor', 'win', 'end', 'w', 'v', 'e'])
     @commands.guild_only()
+    @checks.scrim_master()
     async def winner(self, ctx, winner, update_elo="True"):
 
-        current = await scrim_methods.get_scrim(ctx, check_master=True)
+        current = await scrim_methods.get_scrim(ctx)
         if not current:
             return await scrim_methods.temporary_feedback(ctx, "You cannot do that on this channel.")
 
@@ -977,6 +1073,11 @@ class ScrimCog(commands.Cog):
         await ctx.message.delete()
     
         await current.reset()
+
+    @winner.error
+    async def winner_error(self, ctx, error):
+        if isinstance(error, checks.NotScrimMaster):
+            return await scrim_methods.temporary_feedback(ctx, error)
     
 #################################################################################
 ##
@@ -986,13 +1087,14 @@ class ScrimCog(commands.Cog):
 
     @commands.command()
     @commands.guild_only()
+    @commands.check_any(checks.bot_admin_local(), checks.scrim_master())
     async def terminate(self, ctx):
 
         current = await scrim_methods.get_scrim(ctx)
         if not current:
             return await scrim_methods.temporary_feedback(ctx, "You cannot do that on this channel.")
     
-        if ctx.message.author.guild_permissions.administrator == False and ctx.message.author.id != "162882518381494272":
+        if ctx.message.author.guild_permissions.administrator == False and ctx.message.author.id != "162882518381494272" and current.master != ctx.message.author:
             return await scrim_methods.temporary_feedback(ctx, "You need admin permissions to use that command.")
 
         if current.phase == "no scrim":
@@ -1007,6 +1109,11 @@ class ScrimCog(commands.Cog):
         await current.message.clear_reactions()
 
         await current.reset()
+
+    @terminate.error
+    async def terminate_error(self, ctx, error):
+        if isinstance(error, commands.errors.CheckAnyFailure):
+            return await scrim_methods.temporary_feedback(ctx, "Only bot admins and the owner of the scrim can terminate a scrim.")
 
 #################################################################################
 ##
@@ -1024,7 +1131,21 @@ class ScrimCog(commands.Cog):
     @tasks.loop(minutes=1)
     async def delete_idle_scrims(self):
         for scrim in scrim_methods.Scrim.instances:
-            if scrim.last_interaction > 20 and scrim.phase == "setup":
+
+            if scrim.dont_delete:
+                return None
+            if scrim.server:
+                if scrim.server["delete_inactive"] and scrim.last_interaction > scrim.server["delete_time_mins"] and scrim.phase == "setup":
+                    scrim.embed.description = f"Scrim terminated"
+                    footertemp = "f"
+                    scrim.embed.clear_fields()
+                    scrim.embed.set_footer(text=footertemp)
+                    await scrim.message.edit(embed=scrim.embed)
+                    await scrim.message.clear_reactions()
+                    await scrim.reset()
+                    return None
+
+            elif scrim.last_interaction > 20 and scrim.phase == "setup":
                 scrim.embed.description = f"Scrim terminated"
                 footertemp = "f"
                 scrim.embed.clear_fields()
@@ -1032,6 +1153,7 @@ class ScrimCog(commands.Cog):
                 await scrim.message.edit(embed=scrim.embed)
                 await scrim.message.clear_reactions()
                 await scrim.reset()
+                return None
 
     @commands.Cog.listener()
     async def on_message(self, ctx):

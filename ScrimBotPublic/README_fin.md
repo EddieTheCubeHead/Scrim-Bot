@@ -1,7 +1,7 @@
 ###############################################################################
 
-                             scrimbotti beta0.9.8
-							      07.11.2019
+                             scrimbotti 1.1.0
+							    06.04.2020
 
 ###############################################################################
 
@@ -11,7 +11,7 @@
 
 discord-botti scrim-pelien, eli tuttujen kesken pelattavien pelien, missä
 pelaajat jaetaan kahteen joukkueeseen ja joukkueet pelaavat toisiaan vastaan,
-järjestämiseen discord-serverin käyttäjien kesken. botti luo '/setup (peli)'
+järjestämiseen discord-serverin käyttäjien kesken. botti luo '/scrim (peli)'
 -komennolla kutsuttaessa embed-viestin, joka toimii botin käyttöliittymänä.
 botti tunnistaa kutsutun pelin sisäisestä kirjastosta ja tarkistaa milloin 
 scrimiin on liittynyt tarpeeksi pelaajia. scrim-sessio tukee pelaajana
@@ -70,6 +70,33 @@ moduulissa.
 peliin annetuksi arvoksi ja '/leaderboard (peli) (tilasto)' näyttää annetun
 pelin pelaajien tilastot järjestettynä annetun tilaston mukaan.
 
+###############################################################################
+
+				               roolijärjestelmä
+
+###############################################################################
+
+Botissa on sisäänrakennettuna mahdollisuus yhdellä komennolla luoda serverille
+roolijärjestelmä sisäisen pelilistan pohjalta. "/setup_roles" -komento, joka on
+käytössä vain serverin admin-käyttäjille luo roolin ja emojin jokaiselle botin
+tukemalle pelille, mikäli serverillä ei jo ole sellaista, ja käyttäjän halutessa
+luo vielä uuden kategorian ja kanavan automoidulle roolinasetukselle. Tällä kanavalla
+on vain botin luoma embed-viesti, johon botti alustaa kaikki peliemojit reaktiona
+ja käyttäjät voivat lisätä ja poistaa itseltään rooleja lisäämällä ja poistamalla
+vastaavan pelin reaktioita. Kaikki ei-bottikäyttäjien viestit kyseisellä kanavalla
+poistetaan automaattisesti.
+
+###############################################################################
+
+                                   asetukset
+
+###############################################################################
+
+Botti tukee serverikohtaisia asetuksia. Esimerkkihin kuuluvat muokattavat komento-
+etuliitteet, pelien rajoittaminen black/whitelist -periaatteella ja scrimejä
+järjestämään pystyvien käyttäjien rajoittaminen. Asetuksia voi tarkastella komennolla
+'/settings' ja muokata komennolla '/settings (asetus) (arvo)'. Lisätietoa
+asetuksista saa komennolla '/help settings'.
 
 ###############################################################################
 
@@ -77,13 +104,7 @@ pelin pelaajien tilastot järjestettynä annetun tilaston mukaan.
 
 ###############################################################################
 
-  -pelit luokkaan muutoksia, joilla tunnistetaan, onko pelissä karttoja ja
-      määritellään miten toimitaan kartan valinnan suhteen. voisi ulottaa
-      myös puolten valintaan ja pick orderiin, jos pelistä niitä löytyy.
-  -suolakerroin (huumoriarvo): Äänestys joukkueen suolaisimmasta pelin jälkeen
-  -fill -argumentti '/teams' -komentoon
-  -Mahdollisuus "tilata" tietyn serverin tietyn pelin scrimit
-  -Mahdollisuus alustaa botin tarvitsevat kanavat admin-komennolla
+  -siirretty long_term_goals_and_to_do -tiedostoon
 
 ###############################################################################
 
@@ -91,7 +112,31 @@ pelin pelaajien tilastot järjestettynä annetun tilaston mukaan.
 
 ###############################################################################
 
+  1.1.0 -- 06.04.2020
+
+    -Lisätty roolijärjestelmä tuetuille peleille
+		-Lisätty '/setup_role' järjestelmän automaattiseen luontiin.
+	-Lisätty serverikohtaiset, säädettävät asetukset
+		-Lisätty komennot asetusten tarkastelulle ja muokkaamiselle
+	-Implementoitu discord.py-API:n checks-toiminnallisuus.
+
+  1.0.0 -- 02.02.2020
+
+    -Koulutöiden vuoksi projekti sivuroolissia pitkän aikaa, suuria muutoksia ei
+	ole tehty, mutta käytön myötä ilmenneitä bugeja korjattu tarpeeksi, jotta
+	botti tuntuu vakaalta ja valmiilta.
+		-Tiimien muokkaus uudelleenkirjoitettava 1.1.0: tällä hetkellä botti voi
+		mennä jumiin, jos suorituksessa tulee ongelma kesken tiimien muokkauksen, jättäen
+		puolivalmiita listoja muuttujiin ja pakottaen uudelleenkäynnistyksen
+		muuttujien tyhjentämiseksi.
+	-Pieniä käytettävyysparannuksia ja pohjakoodi asetukset-systeemille (1.2.0?)
+		-Aktiivinen scrim estää viestin lähettämisen kanavalle
+		-/note tämä kiertämiseksi
+		-Lukitsemattomat scrimit terminoidaan viidentoista minuutin jälkeen. Ajastin
+		uudelleenkäynnistetään kaikissa interaktioissa
+
   beta 0.9.8 -- 5.11.2019
+
 	-Koko koodin siistintä kommentteilla, docstringeillä, selkeämmillä muuttujilla
 	ja uusilla funktioilla
 	-Joka scrimillä on nyt mestarikäyttäjä, eli scrimin luoja. Vain mestarikäyttäjä

@@ -1,7 +1,16 @@
 import discord
 from discord.ext import commands, tasks
+
 import elo_methods
 import scrim_methods
+import main_methods
+import checks
+
+#################################################################################
+##
+##A small cog with commands related to the integrated statistics
+##
+#################################################################################
 
 class EloCog(commands.Cog):
     def __init__(self, client):
@@ -15,6 +24,7 @@ class EloCog(commands.Cog):
 
     @commands.command()
     @commands.guild_only()
+    @checks.bot_admin_local()
     async def elo(self, ctx, user_name, init_game, elo):
         if 0 > int(elo) or int(elo) > 4000:
             return await scrim_methods.temporary_feedback(ctx, "Please specify a value between 1 and 4000")
@@ -31,6 +41,11 @@ class EloCog(commands.Cog):
         else:
             return await scrim_methods.temporary_feedback(ctx, f"Couldn't find member {user_name}.")
 
+    @elo.error
+    async def elo_error(self, ctx, error):
+        if isinstance(error, checks.NotBotAdminLocal):
+            return await scrim_methods.temporary_feedback(ctx, error)
+
 #################################################################################
 ##
 ##     a command to display leaderboard of a given statistic in a given game
@@ -39,19 +54,41 @@ class EloCog(commands.Cog):
 
     @commands.command(aliases=['lb','scoreboard','sb'])
     @commands.guild_only()
-    async def leaderboard(self, ctx, stat_game=None, stat="elo"):
+    async def leaderboard(self, ctx, stat_game=None, stat="elo", length=None):
         if not stat_game:
             return await scrim_methods.temporary_feedback(ctx, "Please specify a game. Type '/help games' for a list of all supported games.")
+
+        if length:
+            try:
+                length = int(length)
+            except:
+                return await scrim_methods.temporary_feedback(ctx, "Please specify length as a whole number.")
+        else:
+            try:
+                length = int(stat)
+                stat = "elo"
+            except:
+                pass
 
         for game in elo_methods.Game.instances:
             if stat_game in game.alias['alias']:
                 stat_game = game
                 break
-
         else:
             return await scrim_methods.temporary_feedback(ctx, f"Couldn't find the game '{stat_game}'. Type '/help games' for a list of all supported games.")
 
         leaderboard = {}
+
+        if not length:
+            try:
+                length = main_methods.get_server_configs()[str(ctx.message.guild.id)]["lb_default"]
+            except:
+                length = 25
+
+        try:
+            max = main_methods.get_server_configs()[str(ctx.message.guild.id)]["lb_max"]
+        except:
+            max = 100
 
         if stat in ("elo", "wins", "losses"):
 
@@ -94,6 +131,7 @@ class EloCog(commands.Cog):
             return await scrim_methods.temporary_feedback(ctx, f"Couldn't find the stat '{stat}'. Type '/help leaderboard' for help.")
 
         embedprint = ""
+        counter = 0
 
         #sort the leaderboard
         for key, value in sorted(leaderboard.items(), key=lambda name: name[1], reverse=True):
@@ -102,6 +140,10 @@ class EloCog(commands.Cog):
                 embedprint += "%\n"
             else:
                 embedprint += "\n"
+
+            counter += 1
+            if (length and length <= counter) or (max and max <= counter):
+                break
 
 
         lb = discord.Embed(color=stat_game.color)

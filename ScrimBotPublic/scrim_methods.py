@@ -5,6 +5,12 @@ import main_methods
 import option_methods
 import json
 
+#################################################################################
+##
+##              The Scrim-class and some closely related functions
+##
+#################################################################################
+
 class Scrim:
 
     """Class that houses the information of a single scrim.
@@ -14,12 +20,13 @@ message -- the discord message the main scrim is tied to
 embed -- the embed in the main message
 game -- the game the scrim is setup as, instance of elo_methods.Game
 phase -- declares the scrim's current phase
-players -- a list of players in the scrim
+players -- a list of unsassigned players in the scrim
+player_backup -- a set of all players in the scrim regardless of team
 team1 -- a list of team1 of the scrim
 team2 -- a list of team2 of the scrim
 spectators -- a list of spectators of the scrim
 caps -- a list of captains of the scrim
-voice -- a list ofvoice channels in the main channel's category
+voice -- a list of voice channels in the main scrim channel's category
 options -- a list of options the scrim has, saved as objects (see options_methods)
 last_interaction -- task loops since last interaction
 notes -- note messages connected to the current scrim
@@ -30,7 +37,7 @@ instances -- tracks all instances of Scrim
 participators -- tracks all participators in all scrims"""
 
     instances = []
-    participators = []
+    participators = set()
 
     def __init__(self, id, passtru, *, message=None, embed=None, game=None, phase="no scrim", master=None):
         self.id = id
@@ -40,6 +47,7 @@ participators -- tracks all participators in all scrims"""
         self.phase = phase
         self.master = master
         self.players = []
+        self.player_backup = set()
         self.team1 = []
         self.team2 = []
         self.spectators = []
@@ -50,10 +58,13 @@ participators -- tracks all participators in all scrims"""
         self.notes = []
         self.option_embeds = {}
         self.instances.append(self)
+        self.dont_delete = False
+        self.guild_id = str(passtru.guild.id)
         if passtru.category:
             if passtru.category.voice_channels:
                 for v in passtru.category.voice_channels:
                     self.voice.append(v)
+        self.update_server()
 
     async def reset(self):
 
@@ -64,26 +75,10 @@ participators -- tracks all participators in all scrims"""
         self.game = None
         self.phase = "no scrim"
         self.master = None
-        for p in self.players:
-            try:
-                Scrim.participators.remove(p)
-            except:
-                pass
-        for p in self.team1:
-            try:
-                Scrim.participators.remove(p)
-            except:
-                pass
-        for p in self.team2:
-            try:
-                Scrim.participators.remove(p)
-            except:
-                pass
-        for p in self.spectators:
-            try:
-                Scrim.participators.remove(p)
-            except:
-                pass
+        for p in self.players + list(self.player_backup) + self.spectators:
+            self.participators.discard(p)
+
+        self.player_backup.clear()
         self.players.clear()
         self.team1.clear()
         self.team2.clear()
@@ -96,6 +91,7 @@ participators -- tracks all participators in all scrims"""
         self.notes.clear()
         await self.delete_option_embeds()
         self.option_embeds = {}
+        self.dont_delete = False
 
     def get_options(self):
         if not self.game:
@@ -110,6 +106,12 @@ participators -- tracks all participators in all scrims"""
     async def delete_option_embeds(self):
         for message in self.option_embeds.values():
             await message.delete()
+
+    def update_server(self):
+        try:
+            self.server = main_methods.get_server_configs()[self.guild_id]
+        except:
+            self.server = None
 
     def get_formatted_members(self, group):
 
@@ -149,15 +151,11 @@ returns a string with the players' display names."""
 
         """Clears both teams for a given scrim and moves all players to unassigned."""
 
-        for player in self.team1:
-            self.team1.remove(player)
-            self.players.append(player)
-
-        for player in self.team2:
-            self.team2.remove(player)
-            self.players.append(player)
-
+        self.players.clear()
+        self.team1.clear()
+        self.team2.clear()
         self.caps.clear()
+        self.players = list(self.player_backup)
 
     def move_to(self, player, destination="players"):
     
@@ -168,19 +166,29 @@ player -- a player in the given scrim
 destination -- str team1, team2, caps or players (default: players)"""
 
         if destination[:4] == "team":
-            vars(self)[destination].append(player)
+            if player not in self.players:
+                return False
+
+            try:
+                vars(self)[destination].append(player)
+            except:
+                return False
+
             self.players.remove(player)
             return True
 
         elif destination == "caps":
-            if len(self.caps) >= 2:
+            if len(self.caps) >= 2 or player not in self.players:
                 return False
-            self.caps.append(player)
+
             if len(self.team1) == 0:
-                self.team1.append(player)
+                if not self.move_to(player, "team1"):
+                    return False
             else:
-                self.team2.append(player)
-            self.players.remove(player)
+                if not self.move_to(player, "team2"):
+                    return False
+
+            self.caps.append(player)
             return True
 
         elif player in self.caps:
@@ -214,7 +222,7 @@ returns True is successful, False if not"""
 
         else:
             vars(self)[group].append(user)
-            self.participators.append(user)
+            self.participators.add(user)
 
     def remove_user(self, user):
 
@@ -223,19 +231,24 @@ returns True is successful, False if not"""
 
         if user in self.players:
             self.players.remove(user)
-            self.participators.remove(user)
+            self.participators.discard(user)
             return True
 
         if user in self.spectators:
             self.spectators.remove(user)
-            self.participators.remove(user)
+            self.participators.discard(user)
             return True
     
-    def set_missing_elos(self):
+    async def set_missing_elos(self, ctx):
 
-        for player in self.team1 + self.team2:
-            if player.id not in self.players:
-                self.game.addelo(player.id, 1800)
+        for player in self.player_backup:
+            if str(player.id) not in self.game.players:
+                try:
+                    self.game.addelo(player.id, 1800)
+                    await temporary_feedback(ctx, f"Player '{player.display_name}' missing an elo value! Assigned the default elo of 1800.", delete = False)
+                except:
+                    return False
+        return True
 
     @classmethod
     def setup_instances(self, client):
@@ -243,7 +256,7 @@ returns True is successful, False if not"""
         """Setup instances of Scrim for every eligible channel in client."""
 
         for c in client.get_all_channels():
-            if str(c.type) == "text" and c.name[:5] == "scrim":
+            if str(c.type) == "text" and c.name[:5] == "scrim" and c.name != "scrimbot-role-signup":
                 vars()[c.id] = Scrim(c.id, c)
 
 async def temporary_feedback(ctx, msg, *, delay=8.0, delete=True):
@@ -269,7 +282,7 @@ returns None"""
     await tempmsg.delete(delay=delay)
     return None
 
-async def get_scrim(ctx, *, check_master=False, send_feedback=True):
+async def get_scrim(ctx, *, send_feedback=True):
 
         """Get the instance of Scrim associated with context's (ctx) channel.
         
@@ -277,7 +290,7 @@ arguments:
 ctx -- context message or reaction
 
 keyword arguments:
-check_master -- bool, if True, checks if context author is the master of the current scrim. (default: False)
+send_feedback -- bool, if True, sends verbal feedback on errors.
 
 returns an instance of scrim if successful, None if it failed to find a scrim or a master."""
 
@@ -289,14 +302,8 @@ returns an instance of scrim if successful, None if it failed to find a scrim or
         for channel in Scrim.instances:
             try:
                 if ctx_id == channel.id:
-                    if check_master and (ctx.message.author != channel.master and ctx.message.author.id not in main_methods.get_configs()["admins"]):
-                        if send_feedback:
-                            return await temporary_feedback(ctx, "Only the person who set up the scrim or is a bot admin can manage it.")
-                        else:
-                            return None
-                    else:
-                        channel.last_interaction = 0
-                        return channel
+                    channel.last_interaction = 0
+                    return channel
             except:
                 pass
         else:
