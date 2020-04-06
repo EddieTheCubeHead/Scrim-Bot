@@ -37,23 +37,9 @@ class UtilitiesCog(commands.Cog):
             return (message.channel == ctx.message.channel
                     and message.author == ctx.message.author)
 
-        if str(ctx.guild.id) not in self.server_config:
-            #default server settings
-            self.server_config[str(ctx.guild.id)] = {"lb_default": 25,
-                                                     "roles_setup": False,
-                                                     "role_signup_message": None,
-                                                     "require_setup_permissions": False,
-                                                     "bot_guild_admins": [],
-                                                     "prefix": None,
-                                                     "bot_guild_moderators": [],
-                                                     "games_is_whitelist": False,
-                                                     "games": [],
-                                                     "delete_inactive": True,
-                                                     "delete_time_mins": 20,
-                                                     "delete_msgs_in_scrim": True}
+        self.config_initialization(ctx)
 
-
-        elif self.server_config[str(ctx.guild.id)]["roles_setup"]:
+        if self.server_config[str(ctx.guild.id)]["roles_setup"]:
             query_msg = await ctx.send(f"This server already has a role signup system setup. If you want to run the setup again to update the roles, answer 'yes', if not, answer anything else.")
             try:
                 response_msg = await self.client.wait_for('message', timeout=20.0, check = check)
@@ -181,7 +167,7 @@ class UtilitiesCog(commands.Cog):
             return await scrim_methods.temporary_feedback(ctx, "Roles setup. Did not setup automated signup channel as requested.")
 
         #setting up the signup message embed
-        signup_embed = discord.Embed(title="Role signup", description="React with the games you play to get pingable roles for them.", color=int("0x008709", 16))
+        signup_embed = discord.Embed(title="Role signup", description="React with the games you play to get pingable roles for them.", color=int("0x00ff00", 16))
         signup_embed.set_author(name="ScrimBot", icon_url="https://upload.wikimedia.org/wikipedia/commons/thumb/3/30/Fxemoji_u1F3AE.svg/512px-Fxemoji_u1F3AE.svg.png")
         signup_embed.set_footer(text="Tip: If you are stuck with a role after this message was reset, just react with that role again and remove the reaction.")
         for game in emojis:
@@ -229,7 +215,304 @@ class UtilitiesCog(commands.Cog):
 
 #################################################################################
 ##
-##      update all cogs and the game list and reset the bot
+##                 command group for managing server settings
+##
+#################################################################################
+
+    @commands.group()
+    @commands.guild_only()
+    @checks.settings_eligible()
+    async def settings(self, ctx):
+        if ctx.invoked_subcommand is None:
+            if str(ctx.guild.id) not in self.server_config:
+                lb_default = "25"
+                lb_max = "100"
+                require_setup_permissions = "True"
+                guild_admin_is_bot_admin = "True"
+                prefix = "/"
+                games_type = "Blacklisted games"
+                games = "None"
+                delete_inactive = "20 minutes"
+                delete_msgs_in_scrim = "True"
+                bot_guild_admins = "None"
+                bot_guild_moderators = "None"
+            else:
+                lb_max = self.server_config[str(ctx.guild.id)]["lb_max"] or "Unlimited"
+                lb_default = self.server_config[str(ctx.guild.id)]["lb_default"] or lb_max
+                if self.server_config[str(ctx.guild.id)]["require_setup_permissions"]:
+                    require_setup_permissions = "True"
+                else:
+                    require_setup_permissions = "False"
+                if self.server_config[str(ctx.guild.id)]["guild_admin_is_bot_admin"]:
+                    guild_admin_is_bot_admin = "True"
+                else:
+                    guild_admin_is_bot_admin = "False"
+                prefix = self.server_config[str(ctx.guild.id)]["prefix"] or "/"
+                if self.server_config[str(ctx.guild.id)]["games_is_whitelist"]:
+                    games_type = "Whitelisted games"
+                else:
+                    games_type = "Blacklisted games"
+                games = "\n".join(self.server_config[str(ctx.guild.id)]["games"]) or "None"
+                if self.server_config[str(ctx.guild.id)]["delete_inactive"]:
+                    delete_inactive = self.server_config[str(ctx.guild.id)]["delete_time_mins"] or "20"
+                else:
+                    delete_inactive = "Not enabled"
+                if self.server_config[str(ctx.guild.id)]["delete_msgs_in_scrim"]:
+                    delete_msgs_in_scrim = "True"
+                else:
+                    delete_msgs_in_scrim = "False"
+                bot_guild_admins = "\n".join(self.server_config[str(ctx.guild.id)]["bot_guild_admins"]) or "None"
+                bot_guild_moderators = "\n".join(self.server_config[str(ctx.guild.id)]["bot_guild_moderators"]) or "None"
+
+            setting_embed = discord.Embed(title = "Current server settings", description = "Use '/**settings** _setting value_ to change a setting.")
+            setting_embed.set_author(name=ctx.guild.name, icon_url=ctx.guild.icon_url_as())
+            setting_embed.add_field(name="Leaderboard default length", value=lb_default, inline=False)
+            setting_embed.add_field(name="Leaderboard maximum length", value=lb_max, inline=False)
+            setting_embed.add_field(name="Require bot moderator permissions to setup scrim", value=require_setup_permissions, inline=False)
+            setting_embed.add_field(name="Guild admins have bot admin rights", value=guild_admin_is_bot_admin, inline=False)
+            setting_embed.add_field(name=games_type, value=games, inline=False)
+            setting_embed.add_field(name="Inactive scrim deletion", value=delete_inactive, inline=False)
+            setting_embed.add_field(name="Delete messages in channels with active scrims", value=delete_msgs_in_scrim, inline=False)
+            setting_embed.add_field(name="Guild's bot admins", value=bot_guild_admins, inline=False)
+            setting_embed.add_field(name="Guild's bot moderators", value=bot_guild_moderators, inline=False)
+            setting_embed.set_footer(text="Type '/help settings' for more information.")
+            await ctx.send(embed = setting_embed)
+
+    @settings.error
+    async def settings_error(self, ctx, error):
+        if isisinstance(error, checks.NotSettingsEligible):
+            return await scrim_methods.temporary_feedback(ctx, error)
+
+#################################################################################
+##
+##                      /settings leaderboard_default
+##
+#################################################################################'
+
+    @settings.command()
+    async def leaderboard_default(self, ctx, value: int):
+        self.config_initialization(ctx)
+        self.server_config[str(ctx.guild.id)]["lb_default"] = value
+        main_methods.save_server_configs(self.server_config)
+        return await scrim_methods.temporary_feedback(ctx, f"Default length of leaderboards successfully set to {value}.")
+
+#################################################################################
+##
+##                      /settings leaderboard_max
+##
+#################################################################################
+
+    @settings.command()
+    async def leaderboard_max(self, ctx, value: int):
+        self.config_initialization(ctx)
+        self.server_config[str(ctx.guild.id)]["lb_max"] = value
+        main_methods.save_server_configs(self.server_config)
+        return await scrim_methods.temporary_feedback(ctx, f"Maximum length of leaderboards successfully set to {value}.")
+
+#################################################################################
+##
+##                      /settings delete_timer_scrims
+##
+#################################################################################
+
+    @settings.command()
+    async def delete_timer_scrims(self, ctx, value: int):
+        self.config_initialization(ctx)
+        self.server_config[str(ctx.guild.id)]["delete_time_mins"] = value
+        main_methods.save_server_configs(self.server_config)
+        return await scrim_methods.temporary_feedback(ctx, f"Idle scrim deletion delay successfully set to {value}.")
+
+#################################################################################
+##
+##                      /settings scrim_permissions
+##
+#################################################################################
+
+    @settings.command()
+    async def scrim_permissions(self, ctx, value: bool):
+        self.config_initialization(ctx)
+        self.server_config[str(ctx.guild.id)]["require_setup_permissions"] = value
+        main_methods.save_server_configs(self.server_config)
+        return await scrim_methods.temporary_feedback(ctx, f"Scrim setup requiring permissions successfully set to {value}.")
+
+#################################################################################
+##
+##                      /settings guild_bot_admin
+##
+#################################################################################
+
+    @settings.command()
+    async def guild_bot_admin(self, ctx, value: bool):
+        self.config_initialization(ctx)
+        self.server_config[str(ctx.guild.id)]["guild_admin_is_bot_admin"] = value
+        main_methods.save_server_configs(self.server_config)
+        return await scrim_methods.temporary_feedback(ctx, f"Server admins automatically having bot admin permissions on the server successfully set to {value}.")
+
+#################################################################################
+##
+##                      /settings delete_idle_scrims
+##
+#################################################################################
+
+    @settings.command()
+    async def delete_idle_scrims(self, ctx, value: bool):
+        self.config_initialization(ctx)
+        self.server_config[str(ctx.guild.id)]["delete_inactive"] = value
+        main_methods.save_server_configs(self.server_config)
+        return await scrim_methods.temporary_feedback(ctx, f"Automatically deleting idle scrims on the server successfully set to {value}.")
+
+#################################################################################
+##
+##                      /settings scrim_delete_messages
+##
+#################################################################################
+
+    @settings.command()
+    async def scrim_delete_messages(self, ctx, value: bool):
+        self.config_initialization(ctx)
+        self.server_config[str(ctx.guild.id)]["delete_msgs_in_scrim"] = value
+        main_methods.save_server_configs(self.server_config)
+        return await scrim_methods.temporary_feedback(ctx, f"Automatically deleting messages on channels with active scrims successfully set to {value}.")
+
+#################################################################################
+##
+##                      /settings prefix
+##
+#################################################################################
+
+    @settings.command()
+    async def prefix(self, ctx, value):
+        self.config_initialization(ctx)
+        self.server_config[str(ctx.guild.id)]["prefix"] = value
+        main_methods.save_server_configs(self.server_config)
+        return await scrim_methods.temporary_feedback(ctx, f"Server bot prefix successfully set to '{value}'.")
+
+#################################################################################
+##
+##                      /settings games_whitelist
+##
+#################################################################################
+
+    @settings.command()
+    async def games_whitelist(self, ctx, value: bool):
+        self.config_initialization(ctx)
+        self.server_config[str(ctx.guild.id)]["games_is_whitelist"] = value
+        main_methods.save_server_configs(self.server_config)
+        if value:
+            text = "Server game list set to whitelist."
+        else:
+            text = "Server game list set to blacklist."
+        return await scrim_methods.temporary_feedback(ctx, text)
+
+#################################################################################
+##
+##                      /settings ping_created_scrim
+##
+#################################################################################
+
+    @settings.command()
+    async def ping_created_scrim(self, ctx, value: bool):
+        self.config_initialization(ctx)
+        self.server_config[str(ctx.guild.id)]["ping_game_role"] = value
+        main_methods.save_server_configs(self.server_config)
+        return await scrim_methods.temporary_feedback(ctx, f"Pinging the scrim's game on scrim setup successfully set to '{value}'.")
+
+#################################################################################
+##
+##                      /settings admin -ryhmä
+##
+#################################################################################
+
+    @settings.group(invoke_without_command=True)
+    async def admin(self, ctx):
+        return await scrim_methods.temporary_feedback(ctx, "Invalid use of command '/settings admin'. Use '/settings admin _add/remove/clear_' to manipulate server admins.")
+
+    @admin.command()
+    async def add(self, ctx, members: commands.Greedy[discord.Member]):
+        self.config_initialization(ctx)
+        admin_list = self.server_config[str(ctx.guild.id)]["bot_guild_admins"]
+        for member in members:
+            if member.id not in admin_list:
+                admin_list.append(member.id)
+                await scrim_methods.temporary_feedback(ctx, f"Added {member.display_name} as bot admin", delete=False)
+            else:
+                await scrim_methods.temporary_feedback(ctx, f"User {member.display_name} is already a bot admin", delete=False)
+        self.server_config[str(ctx.guild.id)]["bot_guild_admins"] = admin_list
+        main_methods.save_server_configs(self.server_config)
+        await ctx.message.delete()
+        return
+
+    @admin.command()
+    async def remove(self, ctx, members: commands.Greedy[discord.Member]):
+        self.config_initialization(ctx)
+        admin_list = self.server_config[str(ctx.guild.id)]["bot_guild_admins"]
+        for member in members:
+            if member.id in admin_list:
+                admin_list.remove(member.id)
+                await scrim_methods.temporary_feedback(ctx, f"Removed {member.display_name} from bot admins", delete=False)
+            else:
+                await scrim_methods.temporary_feedback(ctx, f"User {member.display_name} is not a bot admin", delete=False)
+        self.server_config[str(ctx.guild.id)]["bot_guild_admins"] = admin_list
+        main_methods.save_server_configs(self.server_config)
+        await ctx.message.delete()
+        return
+
+    @admin.command()
+    async def clear(self, ctx):
+        self.config_initialization(ctx)
+        self.server_config[str(ctx.guild.id)]["bot_guild_admins"] = []
+        return await scrim_methods.temporary_feedback(ctx, "Cleared the server admin list.")
+
+#################################################################################
+##
+##                      /settings moderator -ryhmä
+##
+#################################################################################
+
+    @settings.group(invoke_without_command=True)
+    async def moderator(self, ctx):
+        return await scrim_methods.temporary_feedback(ctx, "Invalid use of command '/settings moderator'. Use '/settings moderator _add/remove/clear_' to manipulate server moderators.")
+
+    @moderator.command()
+    async def add(self, ctx, members: commands.Greedy[discord.Member]):
+        self.config_initialization(ctx)
+        moderator_list = self.server_config[str(ctx.guild.id)]["bot_guild_moderators"]
+        for member in members:
+            if member.id not in moderator_list:
+                moderator_list.append(member.id)
+                await scrim_methods.temporary_feedback(ctx, f"Added {member.display_name} as bot moderator.", delete=False)
+            else:
+                await scrim_methods.temporary_feedback(ctx, f"User {member.display_name} is already a bot moderator.", delete=False)
+        self.server_config[str(ctx.guild.id)]["bot_guild_moderators"] = moderator_list
+        main_methods.save_server_configs(self.server_config)
+        await ctx.message.delete()
+        return
+
+    @moderator.command()
+    async def remove(self, ctx, members: commands.Greedy[discord.Member]):
+        self.config_initialization(ctx)
+        moderator_list = self.server_config[str(ctx.guild.id)]["bot_guild_moderators"]
+        for member in members:
+            if member.id in moderator_list:
+                moderator_list.remove(member.id)
+                await scrim_methods.temporary_feedback(ctx, f"Removed {member.display_name} from bot moderators.", delete=False)
+            else:
+                await scrim_methods.temporary_feedback(ctx, f"User {member.display_name} is not a bot moderator.", delete=False)
+        self.server_config[str(ctx.guild.id)]["bot_guild_moderators"] = moderator_list
+        main_methods.save_server_configs(self.server_config)
+        await ctx.message.delete()
+        return
+
+    @moderator.command()
+    async def clear(self, ctx):
+        self.config_initialization(ctx)
+        self.server_config[str(ctx.guild.id)]["bot_guild_moderators"] = []
+        return await scrim_methods.temporary_feedback(ctx, "Cleared the server moderator list.")
+        
+
+#################################################################################
+##
+##       a command to update all cogs and the game list and reset the bot
 ##
 #################################################################################
 
@@ -271,7 +554,7 @@ class UtilitiesCog(commands.Cog):
 
     @commands.Cog.listener()
     async def on_message(self, ctx):
-        if str(ctx.guild.id) in self.server_config:
+        if ctx.guild and str(ctx.guild.id) in self.server_config:
             if self.server_config[str(ctx.guild.id)]["role_signup_message"] and ctx.channel.name == "scrimbot-role-signup" and not ctx.author.bot:
                 await ctx.delete()
 
@@ -308,6 +591,27 @@ class UtilitiesCog(commands.Cog):
                                 if role.name == self.emoji_games[react.emoji.name]:
                                     await user.remove_roles(role)
                                     return
+
+    def config_initialization(self, ctx):
+        if str(ctx.guild.id) in self.server_config:
+            return
+        else:
+            self.server_config[str(ctx.guild.id)] = {"lb_default": 25,
+                                                     "lb_max": 100,
+                                                     "roles_setup": False,
+                                                     "role_signup_message": None,
+                                                     "require_setup_permissions": False,
+                                                     "guild_admin_is_bot_admin": True,
+                                                     "bot_guild_admins": [],
+                                                     "prefix": None,
+                                                     "bot_guild_moderators": [],
+                                                     "games_is_whitelist": False,
+                                                     "games": [],
+                                                     "delete_inactive": True,
+                                                     "delete_time_mins": 20,
+                                                     "delete_msgs_in_scrim": True,
+                                                     "ping_game_role": False,
+                                                     "ping_cooldown_seconds": 120}
 
 
 def setup(client):

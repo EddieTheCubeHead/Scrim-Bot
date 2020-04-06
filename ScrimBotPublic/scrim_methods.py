@@ -53,15 +53,12 @@ participators -- tracks all participators in all scrims"""
         self.option_embeds = {}
         self.instances.append(self)
         self.dont_delete = False
-        try:
-            self.server = main_methods.get_server_configs()[str(passtru.guild.id)]
-        except:
-            print(str(passtru.guild.id))
-            self.server = None
+        self.guild_id = str(passtru.guild.id)
         if passtru.category:
             if passtru.category.voice_channels:
                 for v in passtru.category.voice_channels:
                     self.voice.append(v)
+        self.update_server()
 
     async def reset(self):
 
@@ -103,6 +100,12 @@ participators -- tracks all participators in all scrims"""
     async def delete_option_embeds(self):
         for message in self.option_embeds.values():
             await message.delete()
+
+    def update_server(self):
+        try:
+            self.server = main_methods.get_server_configs()[self.guild_id]
+        except:
+            self.server = None
 
     def get_formatted_members(self, group):
 
@@ -247,7 +250,7 @@ returns True is successful, False if not"""
         """Setup instances of Scrim for every eligible channel in client."""
 
         for c in client.get_all_channels():
-            if str(c.type) == "text" and c.name[:5] == "scrim":
+            if str(c.type) == "text" and c.name[:5] == "scrim" and c.name != "scrimbot-role-signup":
                 vars()[c.id] = Scrim(c.id, c)
 
 async def temporary_feedback(ctx, msg, *, delay=8.0, delete=True):

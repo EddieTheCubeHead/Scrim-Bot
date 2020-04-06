@@ -20,6 +20,9 @@ class NotServerAdmin(commands.CheckFailure):
 class NotScrimMaster(commands.CheckFailure):
     pass
 
+class NotSettingsEligible(commands.CheckFailure):
+    pass
+
 def scrim_eligible():
     async def predicate(ctx):
         server_config = main_methods.get_server_configs()
@@ -45,10 +48,10 @@ def bot_admin_local():
         server_config = main_methods.get_server_configs()
         config = main_methods.get_configs()
         if str(ctx.guild.id) in server_config:
-            if ctx.author.id in server_config[str(ctx.guild.id)]["bot_guild_admins"]:
+            if (ctx.author.id in server_config[str(ctx.guild.id)]["bot_guild_admins"] or
+                server_config[str(ctx.guild.id)]["guild_admin_is_bot_admin"] and  ctx.message.author.guild_permissions.administrator or
+                ctx.message.author.id == ctx.guild.owner.id):
                 return True
-        if str(ctx.author.id) in config["admins"]:
-            return True
         raise NotBotAdminLocal("This command requires you to have bot admin permissions on this server. If you feel like you should have the permissions, please contact the server owner.")
     return commands.check(predicate)
 
@@ -65,4 +68,19 @@ def scrim_master():
         if ctx.message.author != scrim.master:
             raise NotScrimMaster("Only the person who set up the scrim or is a bot admin can manage it.")
         return True
+    return commands.check(predicate)
+
+def settings_eligible():
+    async def predicate(ctx):
+        server_config = main_methods.get_server_configs()
+        if str(ctx.guild.id) in server_config: 
+            if (server_config[str(ctx.guild.id)]["guild_admin_is_bot_admin"] and
+                (ctx.message.author.guild_permissions.administrator or
+                ctx.message.author.id in server_config[str(ctx.guild.id)]["bot_guild_admins"])):
+                return True
+            elif ctx.message.author.id in server_config[str(ctx.guild.id)]["bot_guild_admins"]:
+                return True
+        elif ctx.message.author.guild_permissions.administrator:
+            return True
+        raise NotSettingsEligible("You do not have required permissions to manage server settings.")
     return commands.check(predicate)

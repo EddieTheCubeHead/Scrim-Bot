@@ -48,9 +48,9 @@ Subscribing to scrims
 	-Registration message that is created on the same interactive command as roles (done)
 		-Has one message with the roles as reactions. Assigns roles based on reactions. (done)
 	-Automatic detection of existing registration channels/messages on startup (done)
-	-Argument to ping the role of the current scrim's game when creating a scrim
+	-Argument to ping the role of the current scrim's game when creating a scrim (done)
 	-Server-wide setting enable/disable automatic pinging when creating a scrim (default, false)
-	-Command to have the bot ping the role of the scrim's game
+	-Command to have the bot ping the role of the scrim's game (done)
 		-This is better than pinging yourself because the message can be easily auto-deleted when the
 		scrim ends and pinging rate can be reduced with a server-wide setting
 
@@ -59,7 +59,7 @@ Rewriting team management in code.
 	-Possibly implementing a set of all participating players for each locked 
 	scrim to make duplicating or losing participators of a specific scrim impossible (done)
 	-Test the changed code for bugs
-		-Squash them all
+		-Squash them all (most glaring ones fixed)
 	-Possibly implement better error management for Scrim.set_missing_elos (should ideally tell
 	which player caused the problem) (done)
 
@@ -84,16 +84,19 @@ Skill bracket system
 
 						  long term plans and goals
 
-############################################################################### 
+###############################################################################
+
+Have a look at whether ratings should be moved to a database as well how big
+a task said rewrite would be.
 
 Integrate with a server to actually host the scrims (pipe dream)
 
 Civ V drafting as a part of options
 
 Server-specific options
-	-Larger servers: have a whitelist of user who can setup scrims
-	-Custom prefix for servers
-	-Change the default length of leaderboards displayed
+	-Larger servers: have a whitelist of user who can setup scrims (done)
+	-Custom prefix for servers (done)
+	-Change the default length of leaderboards displayed (done)
 
 Rewrite pickup games for fuller support for things like choosing starting cap and
 allowing to pass strings such as ABABBABA to enable fully customized picking order

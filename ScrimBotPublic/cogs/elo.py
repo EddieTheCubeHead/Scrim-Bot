@@ -4,6 +4,7 @@ from discord.ext import commands, tasks
 import elo_methods
 import scrim_methods
 import main_methods
+import checks
 
 class EloCog(commands.Cog):
     def __init__(self, client):
@@ -17,6 +18,7 @@ class EloCog(commands.Cog):
 
     @commands.command()
     @commands.guild_only()
+    @checks.bot_admin_local()
     async def elo(self, ctx, user_name, init_game, elo):
         if 0 > int(elo) or int(elo) > 4000:
             return await scrim_methods.temporary_feedback(ctx, "Please specify a value between 1 and 4000")
@@ -32,6 +34,11 @@ class EloCog(commands.Cog):
                             return await scrim_methods.temporary_feedback(ctx, f"{user_name} already has elo statistics.")
         else:
             return await scrim_methods.temporary_feedback(ctx, f"Couldn't find member {user_name}.")
+
+    @elo.error
+    async def elo_error(self, ctx, error):
+        if isinstance(error, checks.NotBotAdminLocal):
+            return await scrim_methods.temporary_feedback(ctx, error)
 
 #################################################################################
 ##
@@ -71,6 +78,11 @@ class EloCog(commands.Cog):
                 length = main_methods.get_server_configs()[str(ctx.message.guild.id)]["lb_default"]
             except:
                 length = 25
+
+        try:
+            max = main_methods.get_server_configs()[str(ctx.message.guild.id)]["lb_max"]
+        except:
+            max = 100
 
         if stat in ("elo", "wins", "losses"):
 
@@ -124,7 +136,7 @@ class EloCog(commands.Cog):
                 embedprint += "\n"
 
             counter += 1
-            if length and length <= counter:
+            if (length and length <= counter) or (max and max <= counter):
                 break
 
 

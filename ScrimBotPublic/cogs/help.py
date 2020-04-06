@@ -22,13 +22,13 @@ class HelpCog(commands.Cog):
     '/pick' - pick players if scrim is set to pick-up -mode.
     '/leaderboard' - view the leaderboard.
     '/elo' - initialize elo-ratings for players. Only available to server admins.
-    '/update' - update the current list of games. Only available to server admins and only usable if no scrims are being setup or underway.
-
-    To get more info of a specific command please type '/help (command)'. To get a list of supported games and their aliases, type '/help games'."""
+    '/update' - update the current list of games. Only available to global bot admins.
+    '/settings' - view and change the bot's settings for the server. Only available to admins."""
 
             embed=discord.Embed(color=0x00ff00)
             embed.set_author(name="Scrimbot help")
             embed.add_field(name="General commands", value=txt, inline=True)
+            embed.set_footer(text="To get more info of a specific command please type '/help (command)'. To get a list of supported games and their aliases, type '/help games'.")
 
             try:
                 await ctx.message.delete()
@@ -48,6 +48,7 @@ class HelpCog(commands.Cog):
         embed=discord.Embed(color=0x00ff00)
         embed.set_author(name="Scrimbot help")
         embed.add_field(name="/scrim", value=txt, inline=True)
+        embed.set_footer(text="To get more info of a specific command please type '/help (command)'. To get a list of supported games and their aliases, type '/help games'.")
 
         try:
             await ctx.message.delete()
@@ -65,6 +66,7 @@ class HelpCog(commands.Cog):
         embed=discord.Embed(color=0x00ff00)
         embed.set_author(name="Scrimbot help")
         embed.add_field(name="/lock", value=txt, inline=True)
+        embed.set_footer(text="To get more info of a specific command please type '/help (command)'. To get a list of supported games and their aliases, type '/help games'.")
 
         try:
             await ctx.message.delete()
@@ -88,6 +90,7 @@ class HelpCog(commands.Cog):
         embed=discord.Embed(color=0x00ff00)
         embed.set_author(name="Scrimbot help")
         embed.add_field(name="/teams", value=txt, inline=True)
+        embed.set_footer(text="To get more info of a specific command please type '/help (command)'. To get a list of supported games and their aliases, type '/help games'.")
 
         try:
             await ctx.message.delete()
@@ -105,6 +108,7 @@ class HelpCog(commands.Cog):
         embed=discord.Embed(color=0x00ff00)
         embed.set_author(name="Scrimbot help")
         embed.add_field(name="/predict", value=txt, inline=True)
+        embed.set_footer(text="To get more info of a specific command please type '/help (command)'. To get a list of supported games and their aliases, type '/help games'.")
 
         try:
             await ctx.message.delete()
@@ -122,6 +126,7 @@ class HelpCog(commands.Cog):
         embed=discord.Embed(color=0x00ff00)
         embed.set_author(name="Scrimbot help")
         embed.add_field(name="/start", value=txt, inline=True)
+        embed.set_footer(text="To get more info of a specific command please type '/help (command)'. To get a list of supported games and their aliases, type '/help games'.")
 
         try:
             await ctx.message.delete()
@@ -139,6 +144,7 @@ class HelpCog(commands.Cog):
         embed=discord.Embed(color=0x00ff00)
         embed.set_author(name="Scrimbot help")
         embed.add_field(name="/winner", value=txt, inline=True)
+        embed.set_footer(text="To get more info of a specific command please type '/help (command)'. To get a list of supported games and their aliases, type '/help games'.")
 
         try:
             await ctx.message.delete()
@@ -156,6 +162,7 @@ class HelpCog(commands.Cog):
         embed=discord.Embed(color=0x00ff00)
         embed.set_author(name="Scrimbot help")
         embed.add_field(name="/terminate", value=txt, inline=True)
+        embed.set_footer(text="To get more info of a specific command please type '/help (command)'. To get a list of supported games and their aliases, type '/help games'.")
 
         try:
             await ctx.message.delete()
@@ -182,6 +189,7 @@ class HelpCog(commands.Cog):
         embed=discord.Embed(color=0x00ff00)
         embed.set_author(name="Scrimbot help")
         embed.add_field(name="Pick-up games", value=txt, inline=True)
+        embed.set_footer(text="To get more info of a specific command please type '/help (command)'. To get a list of supported games and their aliases, type '/help games'.")
 
         try:
             await ctx.message.delete()
@@ -204,6 +212,7 @@ class HelpCog(commands.Cog):
         embed=discord.Embed(color=0x00ff00)
         embed.set_author(name="Scrimbot help")
         embed.add_field(name="Leaderboard and elo-system", value=txt, inline=True)
+        embed.set_footer(text="To get more info of a specific command please type '/help (command)'. To get a list of supported games and their aliases, type '/help games'.")
 
         try:
             await ctx.message.delete()
@@ -224,6 +233,7 @@ class HelpCog(commands.Cog):
         embed=discord.Embed(color=0x00ff00)
         embed.set_author(name="Scrimbot help")
         embed.add_field(name="Supported games", value=txt, inline=True)
+        embed.set_footer(text="To get more info of a specific command please type '/help (command)'. To get a list of supported games and their aliases, type '/help games'.")
 
         try:
             await ctx.message.delete()
@@ -236,11 +246,59 @@ class HelpCog(commands.Cog):
     @help.command()
     async def update(self, ctx):
 
-        txt = f"""Update the current list of games. This temporarily removes all supported games and so can only be used by server admins and can only be used if no scrims are being setup or underway."""
+        txt = f"""Update the current list of games. This temporarily removes all supported games and so can only be used by bot admins and can only be used if no scrims are being setup or underway."""
 
         embed=discord.Embed(color=0x00ff00)
         embed.set_author(name="Scrimbot help")
         embed.add_field(name="/update", value=txt, inline=True)
+        embed.set_footer(text="To get more info of a specific command please type '/help (command)'. To get a list of supported games and their aliases, type '/help games'.")
+
+        try:
+            await ctx.message.delete()
+        except:
+            pass
+        await ctx.message.author.send(embed=embed)
+
+    # '/help settings':
+    @help.command()
+    async def settings(self, ctx):
+
+        txt = f"""Server admins can configure the settings of their server to their liking with the '/settings _category value_'-command. To view a server's settings, you can use just '/settings'.
+
+To change the bot's prefix on the server you can use the following command:
+'/settings prefix _prefix_'"""
+
+        txt_2 = """The following commands take a positive whole number as their argument:
+        
+'leaderboard_default' - Give the default length for the '/leaderboard' -command. Default 25, 0 means unlimited.
+'leaderboard_max' - Give the maximum allowed length for the '/leaderboard' -command. Default 100, 0 means unlimited.
+'delete_timer_scrims' - Give the time in minutes the bot waits before deleting an idle scrim. Default 20."""
+
+        txt_3 = """The following commands take a boolean truth value as their argument. Many variations work, such as 'true', 'false', 'yes' and 'no':
+        
+'scrim_permissions' - Change if setting up a scrim should require special permissions. If false, anyone can setup a scrim. If true, only server admins and server bot moderators and admins can setup scrims. Default 'false'.
+'guild_bot_admin' - Change if guild admins should also have admin rights for the bot. Server owner has bot admin rights regardless of this setting. Default 'true'.
+'scrim_delete_messages' - Change if messages in channels with active scrims are automatically deleted. Default 'true'.
+'delete_idle_scrims' - Change if unlocked scrims that are idle for too long are automatically deleted. Default 'true'.
+'games_whitelist' - Change if the guild is a whitelist instead of a blacklist. Default 'false'.
+'ping_created_scrim' - Change if new scrims automatically ping the role of their game. Default 'false'."""
+
+        txt_4 = """The following commands manipulate the special rights of the bot's users on your server. All but the clear commands take most forms of user identification for specifying a member to target, but a mention is recommended. You can add permissions to as many users as you want at once.
+
+'admin add' - Add bot admins to the server. Server bot admins can change the bot's settings and terminate scrims.
+'admin remove' - Remove bot admins.
+'admin clear' - Removes all added bot admins. Might leave you in a situation where only the server owner has bot admin rights. Use with care.
+'moderator add' - Add bot moderators to the server. Bot moderators don't have any other special rights, but they can setup scrims even if special permissions to setup scrims on a server are enabled.
+'moderator remove' - Remove bot moderators.
+'moderator clear' - Removes all bot moderators."""
+
+        embed=discord.Embed(color=0x00ff00)
+        embed.set_author(name="Scrimbot help")
+        embed.add_field(name="/settings", value=txt, inline=False)
+        embed.add_field(name="Numeric settings", value=txt_2, inline=False)
+        embed.add_field(name="Boolean settings", value=txt_3, inline=False)
+        embed.add_field(name="Permission manipulation", value=txt_4, inline=False)
+        embed.set_footer(text="To get more info of a specific command please type '/help (command)'. To get a list of supported games and their aliases, type '/help games'.")
 
         try:
             await ctx.message.delete()

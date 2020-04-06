@@ -1,8 +1,12 @@
 import discord
 from discord.ext import commands, tasks
-import os
+
+
 import elo_methods
 import scrim_methods
+import main_methods
+
+import os
 import json
 import itertools
 import random
@@ -316,10 +320,52 @@ class ScrimCog(commands.Cog):
         await current.message.add_reaction(emoji = "\U0001F3AE")    #video game controller
         await current.message.add_reaction(emoji = "\U0001F441")    #eye
 
+        if current.server:
+            if current.server["ping_game_role"]:
+                for role in ctx.guild.roles:
+                    if role.name == current.game.dispname:
+                        ping = role.mention
+                        return await scrim_methods.temporary_feedback(ctx, ping, delay=180)
+                return await scrim_methods.temporary_feedback(ctx, "Couldn't find a role for the game of the current scrim.")
+
     @scrim.error
     async def scrim_error(self, ctx, error):
         if isinstance(error, checks.InadequatePermissions):
             return await scrim_methods.temporary_feedback(ctx, error)
+
+#################################################################################
+##
+##             Command for pinging the role of the scrim's game
+##
+#################################################################################
+
+    @commands.command()
+    @commands.cooldown(1, 180, commands.BucketType.channel)
+    @commands.guild_only()
+    async def ping(self, ctx):
+        current = await scrim_methods.get_scrim(ctx)
+        if not current:
+            return None
+
+        if current.server:
+            print(current.server)
+
+        elif not current.server or not current.server["roles_setup"]:
+            return await scrim_methods.temporary_feedback(ctx, "Pinging for players is only supported on servers that have setup the role system.")
+
+        elif current.phase != "setup":
+            return await scrim_methods.temporary_feedback(ctx, "You can only ping users if there is a scrim currently looking for players.")
+
+        for role in ctx.guild.roles:
+            if role.name == current.game.dispname:
+                ping = role.mention
+                return await scrim_methods.temporary_feedback(ctx, ping, delay=180)
+        return await scrim_methods.temporary_feedback(ctx, "Couldn't find a role for the game of the current scrim.")
+
+    @ping.error
+    async def ping_error(self, ctx, error):
+        if isinstance(error, commands.CommandOnCooldown):
+            return await scrim_methods.temporary_feedback(ctx, "Command on cooldown.")
 
 #################################################################################
 ##
@@ -874,7 +920,7 @@ class ScrimCog(commands.Cog):
             else:
                 check += 1
                 current.embed.description = "Scrim underway."
-                footertemp = "Good luck, have fun!"
+                footertemp = "Good luck, have fun! Declare the winner with '**/winner** _team1/team2_'"
 
             for p in current.team2:
                 if p.voice == None:
@@ -890,7 +936,7 @@ class ScrimCog(commands.Cog):
             else:
                 check += 1
                 current.embed.description = "Scrim underway."
-                footertemp = "Good luck, have fun!"
+                footertemp = "Good luck, have fun! Declare the winner with '**/winner** _team1/team2_'"
 
             if check < 2:
             
@@ -941,7 +987,7 @@ class ScrimCog(commands.Cog):
 
  
             current.embed.description = "Scrim underway."
-            footertemp = "Good luck, have fun!"
+            footertemp = "Good luck, have fun! Declare the winner with '**/winner** _team1/team2_'"
             current.embed.set_footer(text=footertemp)
             await current.message.edit(embed=current.embed)
                 
@@ -962,7 +1008,7 @@ class ScrimCog(commands.Cog):
 
             current.phase = "underway"
             current.embed.description = "Scrim underway."
-            footertemp = "Good luck, have fun!"
+            footertemp = "Good luck, have fun! Declare the winner with '**/winner** _team1/team2_'"
             current.embed.set_footer(text=footertemp)
             current.embed.remove_field(0)
             current.embed.set_field_at(2, name="**Team 1**", value=current.get_formatted_members("team1"), inline=True)

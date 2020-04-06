@@ -1,6 +1,8 @@
 import json
 import os
 
+import scrim_methods
+
 def get_configs():
 
     """Gets the config dictionary, from the file 'config'."""
@@ -47,11 +49,20 @@ def save_server_configs(config : dict):
     with open(".servers.json", "w") as server_file:
         json.dump(config, server_file)
 
+    for scrim in scrim_methods.Scrim.instances:
+        scrim.update_server()
+
 async def get_prefix(bot, ctx_msg):
 
     """The prefix-getter of the bot. Returns '/' by default or the guild specific prefix if a guild has one"""
 
     servers = get_server_configs()
-    if str(ctx_msg.guild.id) in servers:
+    if ctx_msg.guild and str(ctx_msg.guild.id) in servers:
         return servers[str(ctx_msg.guild.id)]["prefix"] or "/"
     return "/"
+
+def get_cooldown(ctx):
+    server_configs = get_server_configs()
+    if str(ctx.guild.id) in server_configs:
+        return server_configs[str(ctx.guild.id)]["ping_cooldown_seconds"]
+    return 120

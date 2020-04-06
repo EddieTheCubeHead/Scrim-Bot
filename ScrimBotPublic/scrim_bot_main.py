@@ -11,7 +11,6 @@ from discord.ext import tasks, commands
 import scrim_methods
 import elo_methods
 import main_methods
-import checks
 
 import logging
 import os
