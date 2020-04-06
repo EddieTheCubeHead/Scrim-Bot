@@ -285,7 +285,7 @@ To change the bot's prefix on the server you can use the following command:
 'guild_bot_admin' - Change if guild admins should also have admin rights for the bot. Server owner has bot admin rights regardless of this setting. Default 'true'.
 'scrim_delete_messages' - Change if messages in channels with active scrims are automatically deleted. Default 'true'.
 'delete_idle_scrims' - Change if unlocked scrims that are idle for too long are automatically deleted. Default 'true'.
-'games_whitelist' - Change if the guild is a whitelist instead of a blacklist. Default 'false'.
+'games_is_whitelist' - Change if the guild is a whitelist instead of a blacklist. Default 'false'.
 'ping_created_scrim' - Change if new scrims automatically ping the role of their game. Default 'false'."""
 
         txt_4 = """The following commands manipulate the special rights of the bot's users on your server. All but the clear commands take most forms of user identification for specifying a member to target, but a mention is recommended. You can add permissions to as many users as you want at once.

@@ -291,9 +291,9 @@ class ScrimCog(commands.Cog):
         for team_game in elo_methods.Team.instances:
             if game in team_game.alias['alias']:
                 if current.server:
-                    if (current.server["games_is_whitelist"] == 0) and (team_game.alias['alias'][0] in current.server["games"]):
+                    if (current.server["games_is_whitelist"] == 0) and (team_game.dispname in current.server["games"]):
                         return await scrim_methods.temporary_feedback(ctx, f"The game '{game}' is not allowed on this server.")
-                    elif (current.server["games_is_whitelist"] == 1) and (team_game.alias['alias'][0] not in current.server["games"]):
+                    elif (current.server["games_is_whitelist"] == 1) and (team_game.dispname not in current.server["games"]):
                         return await scrim_methods.temporary_feedback(ctx, f"The game '{game}' is not allowed on this server.")
                 game = team_game
                 break

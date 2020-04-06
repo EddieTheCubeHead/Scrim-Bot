@@ -5,6 +5,7 @@ import asyncio
 
 import main_methods
 import scrim_methods
+import elo_methods
 import checks
 
 class UtilitiesCog(commands.Cog):
@@ -219,68 +220,65 @@ class UtilitiesCog(commands.Cog):
 ##
 #################################################################################
 
-    @commands.group()
+    @commands.group(invoke_without_command=True)
     @commands.guild_only()
     @checks.settings_eligible()
     async def settings(self, ctx):
-        if ctx.invoked_subcommand is None:
-            if str(ctx.guild.id) not in self.server_config:
-                lb_default = "25"
-                lb_max = "100"
-                require_setup_permissions = "True"
-                guild_admin_is_bot_admin = "True"
-                prefix = "/"
-                games_type = "Blacklisted games"
-                games = "None"
-                delete_inactive = "20 minutes"
-                delete_msgs_in_scrim = "True"
-                bot_guild_admins = "None"
-                bot_guild_moderators = "None"
-            else:
-                lb_max = self.server_config[str(ctx.guild.id)]["lb_max"] or "Unlimited"
-                lb_default = self.server_config[str(ctx.guild.id)]["lb_default"] or lb_max
-                if self.server_config[str(ctx.guild.id)]["require_setup_permissions"]:
-                    require_setup_permissions = "True"
-                else:
-                    require_setup_permissions = "False"
-                if self.server_config[str(ctx.guild.id)]["guild_admin_is_bot_admin"]:
-                    guild_admin_is_bot_admin = "True"
-                else:
-                    guild_admin_is_bot_admin = "False"
-                prefix = self.server_config[str(ctx.guild.id)]["prefix"] or "/"
-                if self.server_config[str(ctx.guild.id)]["games_is_whitelist"]:
-                    games_type = "Whitelisted games"
-                else:
-                    games_type = "Blacklisted games"
-                games = "\n".join(self.server_config[str(ctx.guild.id)]["games"]) or "None"
-                if self.server_config[str(ctx.guild.id)]["delete_inactive"]:
-                    delete_inactive = self.server_config[str(ctx.guild.id)]["delete_time_mins"] or "20"
-                else:
-                    delete_inactive = "Not enabled"
-                if self.server_config[str(ctx.guild.id)]["delete_msgs_in_scrim"]:
-                    delete_msgs_in_scrim = "True"
-                else:
-                    delete_msgs_in_scrim = "False"
-                bot_guild_admins = "\n".join(self.server_config[str(ctx.guild.id)]["bot_guild_admins"]) or "None"
-                bot_guild_moderators = "\n".join(self.server_config[str(ctx.guild.id)]["bot_guild_moderators"]) or "None"
 
-            setting_embed = discord.Embed(title = "Current server settings", description = "Use '/**settings** _setting value_ to change a setting.")
-            setting_embed.set_author(name=ctx.guild.name, icon_url=ctx.guild.icon_url_as())
-            setting_embed.add_field(name="Leaderboard default length", value=lb_default, inline=False)
-            setting_embed.add_field(name="Leaderboard maximum length", value=lb_max, inline=False)
-            setting_embed.add_field(name="Require bot moderator permissions to setup scrim", value=require_setup_permissions, inline=False)
-            setting_embed.add_field(name="Guild admins have bot admin rights", value=guild_admin_is_bot_admin, inline=False)
-            setting_embed.add_field(name=games_type, value=games, inline=False)
-            setting_embed.add_field(name="Inactive scrim deletion", value=delete_inactive, inline=False)
-            setting_embed.add_field(name="Delete messages in channels with active scrims", value=delete_msgs_in_scrim, inline=False)
-            setting_embed.add_field(name="Guild's bot admins", value=bot_guild_admins, inline=False)
-            setting_embed.add_field(name="Guild's bot moderators", value=bot_guild_moderators, inline=False)
-            setting_embed.set_footer(text="Type '/help settings' for more information.")
-            await ctx.send(embed = setting_embed)
+        self.config_initialization(ctx)
+
+        lb_max = self.server_config[str(ctx.guild.id)]["lb_max"] or "Unlimited"
+        lb_default = self.server_config[str(ctx.guild.id)]["lb_default"] or lb_max
+
+        if self.server_config[str(ctx.guild.id)]["require_setup_permissions"]:
+            require_setup_permissions = "True"
+        else:
+            require_setup_permissions = "False"
+
+        if self.server_config[str(ctx.guild.id)]["guild_admin_is_bot_admin"]:
+            guild_admin_is_bot_admin = "True"
+        else:
+            guild_admin_is_bot_admin = "False"
+
+        prefix = self.server_config[str(ctx.guild.id)]["prefix"] or "/"
+
+        if self.server_config[str(ctx.guild.id)]["games_is_whitelist"]:
+            games_type = "Whitelisted games"
+        else:
+            games_type = "Blacklisted games"
+
+        games = "\n".join(self.server_config[str(ctx.guild.id)]["games"]) or "None"
+
+        if self.server_config[str(ctx.guild.id)]["delete_inactive"]:
+            delete_inactive = self.server_config[str(ctx.guild.id)]["delete_time_mins"] or "20"
+        else:
+            delete_inactive = "Not enabled"
+
+        if self.server_config[str(ctx.guild.id)]["delete_msgs_in_scrim"]:
+            delete_msgs_in_scrim = "True"
+        else:
+            delete_msgs_in_scrim = "False"
+
+        bot_guild_admins = "\n".join(self.server_config[str(ctx.guild.id)]["bot_guild_admins"]) or "None"
+        bot_guild_moderators = "\n".join(self.server_config[str(ctx.guild.id)]["bot_guild_moderators"]) or "None"
+
+        setting_embed = discord.Embed(title = "Current server settings", description = "Use '/**settings** _setting value_ to change a setting.")
+        setting_embed.set_author(name=ctx.guild.name, icon_url=ctx.guild.icon_url_as())
+        setting_embed.add_field(name="Leaderboard default length", value=lb_default, inline=False)
+        setting_embed.add_field(name="Leaderboard maximum length", value=lb_max, inline=False)
+        setting_embed.add_field(name="Require bot moderator permissions to setup scrim", value=require_setup_permissions, inline=False)
+        setting_embed.add_field(name="Guild admins have bot admin rights", value=guild_admin_is_bot_admin, inline=False)
+        setting_embed.add_field(name=games_type, value=games, inline=False)
+        setting_embed.add_field(name="Inactive scrim deletion", value=delete_inactive, inline=False)
+        setting_embed.add_field(name="Delete messages in channels with active scrims", value=delete_msgs_in_scrim, inline=False)
+        setting_embed.add_field(name="Guild's bot admins", value=bot_guild_admins, inline=False)
+        setting_embed.add_field(name="Guild's bot moderators", value=bot_guild_moderators, inline=False)
+        setting_embed.set_footer(text="Type '/help settings' for more information.")
+        await ctx.send(embed = setting_embed)
 
     @settings.error
     async def settings_error(self, ctx, error):
-        if isisinstance(error, checks.NotSettingsEligible):
+        if isinstance(error, checks.NotSettingsEligible):
             return await scrim_methods.temporary_feedback(ctx, error)
 
 #################################################################################
@@ -389,12 +387,12 @@ class UtilitiesCog(commands.Cog):
 
 #################################################################################
 ##
-##                      /settings games_whitelist
+##                      /settings games_is_whitelist
 ##
 #################################################################################
 
     @settings.command()
-    async def games_whitelist(self, ctx, value: bool):
+    async def games_is_whitelist(self, ctx, value: bool):
         self.config_initialization(ctx)
         self.server_config[str(ctx.guild.id)]["games_is_whitelist"] = value
         main_methods.save_server_configs(self.server_config)
@@ -419,7 +417,7 @@ class UtilitiesCog(commands.Cog):
 
 #################################################################################
 ##
-##                      /settings admin -ryhmä
+##                      /settings admin -group
 ##
 #################################################################################
 
@@ -465,7 +463,7 @@ class UtilitiesCog(commands.Cog):
 
 #################################################################################
 ##
-##                      /settings moderator -ryhmä
+##                      /settings moderator -group
 ##
 #################################################################################
 
@@ -508,7 +506,49 @@ class UtilitiesCog(commands.Cog):
         self.config_initialization(ctx)
         self.server_config[str(ctx.guild.id)]["bot_guild_moderators"] = []
         return await scrim_methods.temporary_feedback(ctx, "Cleared the server moderator list.")
-        
+
+
+#################################################################################
+##
+##                            /settings gamelist -group
+##
+#################################################################################
+
+    @settings.group(invoke_without_command=True)
+    async def gamelist(self, ctx):
+        return await  scrim_methods.temporary_feedback(ctx, "Invalid use of command '/settings gamelist'. Use '/settings gamelist _add/remove/clear_ to manipulate the games white/blacklist.")
+
+    @gamelist.command()
+    async def add(self, ctx, game_name):
+        self.config_initialization(ctx)
+
+        for game in elo_methods.Game.instances:
+            if game_name in game.alias['alias']:
+                if game.dispname in self.server_config[str(ctx.guild.id)]["games"]:
+                    return await scrim_methods.temporary_feedback(ctx, f"The game {game.dispname} is already on the games list.")
+                self.server_config[str(ctx.guild.id)]["games"].append(game.dispname)
+                main_methods.save_server_configs(self.server_config)
+                return await scrim_methods.temporary_feedback(ctx, f"Added game {game.dispname} to the games list.")
+
+    @gamelist.command()
+    async def remove(self, ctx, game_name):
+        self.config_initialization(ctx)
+
+        for game in elo_methods.Game.instances:
+            if game_name in game.alias['alias']:
+                if game.dispname not in self.server_config[str(ctx.guild.id)]["games"]:
+                    return await scrim_methods.temporary_feedback(ctx, f"The game {game.dispname} is not on the games list.")
+                self.server_config[str(ctx.guild.id)]["games"].remove(game.dispname)
+                main_methods.save_server_configs(self.server_config)
+                return await scrim_methods.temporary_feedback(ctx, f"Removed game {game.dispname} from the games list.")
+
+    @gamelist.command()
+    async def clear(self, ctx):
+        self.config_initialization(ctx)
+        self.server_config[str(ctx.guild.id)]["games"].clear()
+        return await scrim_methods.temporary_feedback(ctx, "Cleared the games list.")
+
+
 
 #################################################################################
 ##
