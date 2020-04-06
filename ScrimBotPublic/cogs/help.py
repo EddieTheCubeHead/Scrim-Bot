@@ -10,24 +10,29 @@ class HelpCog(commands.Cog):
     async def help(self, ctx):
         if ctx.invoked_subcommand is None:
 
-            txt = """This bot supports the following commands:
+            txt = """The bot supports the following commands for managing scrims:
 
-    '/scrim (game)' - setup a scrim of the specified game.
-    '/lock' - lock the current players, if the scrim is full.
-    '/teams' - automatically arrange and manage teams.
-    '/predict' - generate a win probability prediction with the current teams.
-    '/start' - start the scrim, once both teams are full.
-    '/winner' - specify the winner of a scrim to both end the scrim and update internal elo.
-    '/terminate' - forcefully end the current scrim. Only usable by admins.
-    '/pick' - pick players if scrim is set to pick-up -mode.
-    '/leaderboard' - view the leaderboard.
-    '/elo' - initialize elo-ratings for players. Only available to server admins.
-    '/update' - update the current list of games. Only available to global bot admins.
-    '/settings' - view and change the bot's settings for the server. Only available to admins."""
+'/scrim (game)' - setup a scrim of the specified game.
+'/lock' - lock the current players, if the scrim is full.
+'/teams' - automatically arrange and manage teams.
+'/predict' - generate a win probability prediction with the current teams.
+'/start' - start the scrim, once both teams are full.
+'/winner' - specify the winner of a scrim to both end the scrim and update internal elo.
+'/terminate' - forcefully end the current scrim. Only usable by admins.
+'/pick' - pick players if scrim is set to pick-up -mode."""
+
+            txt_2 = """The bot supports the following commands for utility and settings:
+
+'/leaderboard' - view the leaderboard.
+'/elo' - initialize elo-ratings for players. Only available to server admins.
+'/update' - update the current list of games. Only available to global bot admins.
+'/settings' - view and change the bot's settings for the server. Only available to admins.      
+'/setup_roles' - setup a role system for the supported games. Only available to admins."""
 
             embed=discord.Embed(color=0x00ff00)
             embed.set_author(name="Scrimbot help")
-            embed.add_field(name="General commands", value=txt, inline=True)
+            embed.add_field(name="Scrim management commands", value=txt, inline=False)
+            embed.add_field(name="Utility commands", value=txt_2, inline=False)
             embed.set_footer(text="To get more info of a specific command please type '/help (command)'. To get a list of supported games and their aliases, type '/help games'.")
 
             try:
