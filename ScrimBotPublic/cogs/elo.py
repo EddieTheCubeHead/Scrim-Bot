@@ -6,6 +6,12 @@ import scrim_methods
 import main_methods
 import checks
 
+#################################################################################
+##
+##A small cog with commands related to the integrated statistics
+##
+#################################################################################
+
 class EloCog(commands.Cog):
     def __init__(self, client):
         self.client = client

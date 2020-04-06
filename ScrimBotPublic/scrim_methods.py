@@ -5,6 +5,12 @@ import main_methods
 import option_methods
 import json
 
+#################################################################################
+##
+##              The Scrim-class and some closely related functions
+##
+#################################################################################
+
 class Scrim:
 
     """Class that houses the information of a single scrim.

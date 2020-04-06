@@ -1,7 +1,7 @@
 ###############################################################################
 
-                       scrimbot 1.1.0, dev version
-							    08.03.2019
+                              scrimbot 1.1.0
+							    06.04.2019
 
 ###############################################################################
 
@@ -115,6 +115,17 @@ that channel will get automatically deleted.
 
 ###############################################################################
 
+                                 settings
+
+###############################################################################
+
+The bot supports server-specific settings. Some of these include custom prefixes,
+black/whitelisting games and restricting users who can setup scrims. Settings can
+be viewed with '/settings' and modified with '/settings (setting) (value)'. More
+info can be found with '/help settings'
+
+###############################################################################
+
                                    ideas
 
 ###############################################################################
@@ -127,6 +138,14 @@ that channel will get automatically deleted.
 
 ###############################################################################
 
+  1.1.0 -- 06.04.2020
+
+    -Added a role system for the supported games
+		-Added the '/setup_role' -command to automatically implement said system
+	-Added server-specific, configurable settings.
+		-Added commands for viewing and modifying settings.
+	-Found out about the checks -system of the discord.py API and implemented it
+    
   1.0.0 -- 02.02.2020
 
     -The development was on a slow burn for a while due to studies. Small bugfixes

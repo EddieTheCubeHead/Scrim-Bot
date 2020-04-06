@@ -3,6 +3,13 @@ import os
 
 import scrim_methods
 
+#################################################################################
+##
+##Some general methods. Used to be more closely related to the main-file. Will
+##most probably be renamed once I get enough energy to think of a good name.
+##
+#################################################################################
+
 def get_configs():
 
     """Gets the config dictionary, from the file 'config'."""

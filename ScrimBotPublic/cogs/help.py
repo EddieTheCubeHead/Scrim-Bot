@@ -2,6 +2,13 @@ import discord
 from discord.ext import commands, tasks
 import elo_methods
 
+#################################################################################
+##
+##A cog to rewrite the default 'help'-command. Includes the default messages and
+##more indepth help for every command.
+##
+#################################################################################
+
 class HelpCog(commands.Cog):
     def __init__(self, client):
         self.client = client

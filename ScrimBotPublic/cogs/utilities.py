@@ -8,12 +8,19 @@ import scrim_methods
 import elo_methods
 import checks
 
+#################################################################################
+##
+##A cog containing general utility commands, mainly the 'settings' command group
+##
+#################################################################################
+
 class UtilitiesCog(commands.Cog):
     def __init__(self, client):
         self.client = client
         self.server_config = main_methods.get_server_configs()
-        self.emoji_games = {}
 
+        # dictionary to help in the creation of emojis
+        self.emoji_games = {}
         game_dict = main_methods.get_game_config()
         for category in game_dict["Games"]:
             for game in game_dict["Games"][category]:
@@ -30,10 +37,10 @@ class UtilitiesCog(commands.Cog):
     @checks.guild_admin()
     async def setup_roles(self, ctx):
 
-        #getting all the games
+        # getting all the games
         game_dict = main_methods.get_game_config()
 
-        #check for the interactive creation and recognising the correct user
+        # check for the interactive creation and recognising the correct user
         def check(message):
             return (message.channel == ctx.message.channel
                     and message.author == ctx.message.author)
@@ -58,7 +65,7 @@ class UtilitiesCog(commands.Cog):
         new_emoji_count = 0
         emoji_overwrites = 0
 
-        #counting new and old roles and emojis for the interactive messages
+        # counting new and old roles and emojis for the interactive messages
         for category in game_dict["Games"]:
             for game in game_dict["Games"][category]:
                 new_role_count += 1
@@ -72,6 +79,7 @@ class UtilitiesCog(commands.Cog):
         new_role_count -= overwrite_count
         new_emoji_count -= emoji_overwrites
 
+        # interactive message if all roles already exist
         if new_role_count == 0:
             query_msg = await ctx.send(f"All games alredy have a role. Overwriting old roles is recommended. If you want to do it answer 'yes', if no, answer anything else.")
             try:
@@ -86,6 +94,7 @@ class UtilitiesCog(commands.Cog):
                 force_overwrite = False
             await response_msg.delete()
 
+        # making sure users know how many roles they will create
         else:
             query_msg = await ctx.send(f"This will create {new_role_count} new roles on the server. If you want to proceed answer 'yes', if not answer anything else.")
 
@@ -111,13 +120,13 @@ class UtilitiesCog(commands.Cog):
             else:
                 force_overwrite = False
 
+        # making sure users know how many emojis they will create
         extra_string = ""
         if emoji_overwrites:
             extra_string = f" and reuse {emoji_overwrites} existing ones"
         query_msg = await ctx.send(f"Do you want to create a signup system for the roles? This will create {new_emoji_count} new emojis on the server{extra_string}. " + 
                                     f"This will also create a signup channel if one does not already exist and post a message on that channel. " + 
                                     f"If you want to do this, answer 'yes', if not, answer anything else.")
-
         try:
             response_msg = await self.client.wait_for('message', timeout=20.0, check = check)
             await query_msg.delete()
@@ -125,19 +134,18 @@ class UtilitiesCog(commands.Cog):
             return await scrim_methods.temporary_feedback(ctx, "Request timed out.", delay = 20.0)
         create_signup_system = (response_msg.content.lower() == "yes")
         await response_msg.delete()
-
-        emojis = {}
         
-        #creating all the necessary roles and emotes
+        # creating all the necessary roles and emotes
+        emojis = {}
         for category in game_dict["Games"]:
             for game in game_dict["Games"][category]:
 
-                #check server-specific gamebans
+                # check server-specific gamebans
                 if ((self.server_config[str(ctx.guild.id)]["games_is_whitelist"] and game not in self.server_config[str(ctx.guild.id)]["games"]) or
                    (not self.server_config[str(ctx.guild.id)]["games_is_whitelist"] and game in self.server_config[str(ctx.guild.id)]["games"])):
                     continue
 
-                #role creation
+                # role creation
                 for role in ctx.message.guild.roles:
                     if str(role) == game_dict["Games"][category][game]["dispname"]:
                         if force_overwrite:
@@ -147,14 +155,14 @@ class UtilitiesCog(commands.Cog):
                             break
                 else:
                     await ctx.message.guild.create_role(name = game_dict["Games"][category][game]["dispname"],
-                                                        #getting the hex values of the color from the game dictionary's color value:
+                                                        # getting the hex values of the color from the game dictionary's color value:
                                                         colour = discord.Color.from_rgb(int(game_dict["Games"][category][game]["colour"][2:4], 16),
                                                                                         int(game_dict["Games"][category][game]["colour"][4:6], 16),
                                                                                         int(game_dict["Games"][category][game]["colour"][6:], 16)),
                                                         mentionable = True,
                                                         reason = "ScrimBot: Setting up roles for games")
 
-                #emoji creation
+                # emoji creation
                 if create_signup_system and game not in list(emoji.name for emoji in ctx.guild.emojis):
                     with open(f"emoji_pics/{game}.png", "rb") as emoji_image:
                         emojis.update({game_dict["Games"][category][game]["dispname"] : await ctx.message.guild.create_custom_emoji(name = game, image = emoji_image.read())})
@@ -165,9 +173,10 @@ class UtilitiesCog(commands.Cog):
                             break
 
         if not create_signup_system:
+            main_methods.save_server_configs(self.server_config)
             return await scrim_methods.temporary_feedback(ctx, "Roles setup. Did not setup automated signup channel as requested.")
 
-        #setting up the signup message embed
+        # setting up the signup message embed
         signup_embed = discord.Embed(title="Role signup", description="React with the games you play to get pingable roles for them.", color=int("0x00ff00", 16))
         signup_embed.set_author(name="ScrimBot", icon_url="https://upload.wikimedia.org/wikipedia/commons/thumb/3/30/Fxemoji_u1F3AE.svg/512px-Fxemoji_u1F3AE.svg.png")
         signup_embed.set_footer(text="Tip: If you are stuck with a role after this message was reset, just react with that role again and remove the reaction.")
@@ -175,19 +184,23 @@ class UtilitiesCog(commands.Cog):
             signup_embed.add_field(name = game, value = str(emojis[game]))
 
 
+        # getting the correct message depending on situation:
+        # channel exists, message missing.
         if ("scrimbot-role-signup" in list(channel.name for channel in ctx.guild.channels)) and (not self.server_config[str(ctx.guild.id)]["role_signup_message"]):
             for channel in ctx.guild.channels:
                 if channel.name == "scrimbot-role-signup":
                     signup_message = await channel.send(embed = signup_embed)
                     feedback = "Role signup channel already exists. Signup message missing, a new one was created."
-
+        
+        # channel and message exist, update message
         elif "scrimbot-role-signup" in list(channel.name for channel in ctx.guild.channels) and self.server_config[str(ctx.guild.id)]["role_signup_message"]:
             for channel in ctx.guild.channels:
                 if channel.name == "scrimbot-role-signup":
                     signup_message = await channel.fetch_message(self.server_config[str(ctx.guild.id)]["role_signup_message"])
                     await signup_message.edit(embed = signup_embed)
                     feedback = "Role signup channel and message already exist. Updated the message."
-
+    
+        # channel missing: create category and channel
         else:
             for category in ctx.guild.categories:
                 if category.name == "SCRIMBOT ROLE SIGNUP":
@@ -200,6 +213,7 @@ class UtilitiesCog(commands.Cog):
             signup_message = await signup_channel.send(embed=signup_embed)
             feedback = "Created a channel and a message for role signup."
 
+        # creating the signup embed and updating
         await signup_message.clear_reactions()
         for game in emojis:
             await signup_message.add_reaction(str(emojis[game]))
@@ -209,6 +223,7 @@ class UtilitiesCog(commands.Cog):
         main_methods.save_server_configs(self.server_config)
         return await scrim_methods.temporary_feedback(ctx, feedback)
 
+    #error handling
     @setup_roles.error
     async def setup_roles_error(self, ctx, error):
         if isinstance(error, checks.NotServerAdmin):
@@ -225,6 +240,7 @@ class UtilitiesCog(commands.Cog):
     @checks.settings_eligible()
     async def settings(self, ctx):
 
+        # getting and formatting all relevant information from the config
         self.config_initialization(ctx)
 
         lb_max = self.server_config[str(ctx.guild.id)]["lb_max"] or "Unlimited"
@@ -262,6 +278,7 @@ class UtilitiesCog(commands.Cog):
         bot_guild_admins = "\n".join(self.server_config[str(ctx.guild.id)]["bot_guild_admins"]) or "None"
         bot_guild_moderators = "\n".join(self.server_config[str(ctx.guild.id)]["bot_guild_moderators"]) or "None"
 
+        # creating ans sending the embed
         setting_embed = discord.Embed(title = "Current server settings", description = "Use '/**settings** _setting value_ to change a setting.")
         setting_embed.set_author(name=ctx.guild.name, icon_url=ctx.guild.icon_url_as())
         setting_embed.add_field(name="Leaderboard default length", value=lb_default, inline=False)
@@ -276,6 +293,7 @@ class UtilitiesCog(commands.Cog):
         setting_embed.set_footer(text="Type '/help settings' for more information.")
         await ctx.send(embed = setting_embed)
 
+    # error handling
     @settings.error
     async def settings_error(self, ctx, error):
         if isinstance(error, checks.NotSettingsEligible):
@@ -633,6 +651,8 @@ class UtilitiesCog(commands.Cog):
                                     return
 
     def config_initialization(self, ctx):
+        """If the ctx guild is lacking a settings dictionary, create one with default values."""
+
         if str(ctx.guild.id) in self.server_config:
             return
         else:
@@ -650,9 +670,7 @@ class UtilitiesCog(commands.Cog):
                                                      "delete_inactive": True,
                                                      "delete_time_mins": 20,
                                                      "delete_msgs_in_scrim": True,
-                                                     "ping_game_role": False,
-                                                     "ping_cooldown_seconds": 120}
-
+                                                     "ping_game_role": False}
 
 def setup(client):
     client.add_cog(UtilitiesCog(client))

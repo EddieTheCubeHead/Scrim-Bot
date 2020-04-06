@@ -1,14 +1,15 @@
-#################################################################################
-##
-##                           elo-module for scrim bot
-##
-#################################################################################
-
 import json
 import math
 import os
 import shutil
 import datetime
+
+#################################################################################
+##
+##The meat of the integrated stats- and matchmaking system. Also houses the class
+##Game and it's subclasses
+##
+#################################################################################
 
 class Game:
 

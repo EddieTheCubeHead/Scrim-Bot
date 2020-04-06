@@ -49,7 +49,7 @@ Subscribing to scrims
 		-Has one message with the roles as reactions. Assigns roles based on reactions. (done)
 	-Automatic detection of existing registration channels/messages on startup (done)
 	-Argument to ping the role of the current scrim's game when creating a scrim (done)
-	-Server-wide setting enable/disable automatic pinging when creating a scrim (default, false)
+	-Server-wide setting enable/disable automatic pinging when creating a scrim (default, false) (done)
 	-Command to have the bot ping the role of the scrim's game (done)
 		-This is better than pinging yourself because the message can be easily auto-deleted when the
 		scrim ends and pinging rate can be reduced with a server-wide setting
@@ -70,15 +70,17 @@ Scrim usability improvements:
 
 Comment all new code and update documentation
 
-	1.X.0:, when X >= 2
+	1.2.0
 
 Options for scrims
-
-Flesh out error handling with checks and @command.error
+	-Hand written on a per-game basis. Start with cs and dota.
+	-Try to get overwatch and civ5 done as well
 
 Rewrite pickup-games (see long-term plans and goals)
 
 Skill bracket system
+
+Flesh out error handling with checks and @command.error
 
 ###############################################################################
 

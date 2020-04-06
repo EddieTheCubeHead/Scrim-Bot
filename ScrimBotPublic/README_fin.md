@@ -1,7 +1,7 @@
 ###############################################################################
 
-                     scrimbotti 1.1.0, kehitt‰j‰versio
-							    01.04.2020
+                             scrimbotti 1.1.0
+							    06.04.2020
 
 ###############################################################################
 
@@ -88,6 +88,18 @@ poistetaan automaattisesti.
 
 ###############################################################################
 
+                                   asetukset
+
+###############################################################################
+
+Botti tukee serverikohtaisia asetuksia. Esimerkkihin kuuluvat muokattavat komento-
+etuliitteet, pelien rajoittaminen black/whitelist -periaatteella ja scrimej‰
+j‰rjest‰m‰‰n pystyvien k‰ytt‰jien rajoittaminen. Asetuksia voi tarkastella komennolla
+'/settings' ja muokata komennolla '/settings (asetus) (arvo)'. Lis‰tietoa
+asetuksista saa komennolla '/help settings'.
+
+###############################################################################
+
                                  kehitysideat
 
 ###############################################################################
@@ -99,6 +111,14 @@ poistetaan automaattisesti.
                                 versiohistoria
 
 ###############################################################################
+
+  1.1.0 -- 06.04.2020
+
+    -Lis‰tty roolij‰rjestelm‰ tuetuille peleille
+		-Lis‰tty '/setup_role' j‰rjestelm‰n automaattiseen luontiin.
+	-Lis‰tty serverikohtaiset, s‰‰dett‰v‰t asetukset
+		-Lis‰tty komennot asetusten tarkastelulle ja muokkaamiselle
+	-Implementoitu discord.py-API:n checks-toiminnallisuus.
 
   1.0.0 -- 02.02.2020
 

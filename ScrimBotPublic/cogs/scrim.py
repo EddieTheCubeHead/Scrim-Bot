@@ -13,6 +13,13 @@ import random
 import asyncio
 import checks
 
+#################################################################################
+##
+##The most important cog of the bot. Houses the commands and listeners that deal
+##with setting up and managing scrims.
+##
+#################################################################################
+
 class ScrimCog(commands.Cog):
     def __init__(self, client):
         self.client = client
@@ -320,6 +327,7 @@ class ScrimCog(commands.Cog):
         await current.message.add_reaction(emoji = "\U0001F3AE")    #video game controller
         await current.message.add_reaction(emoji = "\U0001F441")    #eye
 
+        # ping the correct role, if the setting is enabled
         if current.server:
             if current.server["ping_game_role"]:
                 for role in ctx.guild.roles:
