@@ -6,10 +6,11 @@ the discord server I usually play on, but to keep myself occupied I have started
 the future.
 
 If the project seems like something you could use please contact me for setup guidelines. I will probably make the setup of the bot more
-automated later, but at the moment it requires some manual folder creation.
+automated later, but at the moment it requires some manual folder creation. You can find my email in my profile, if you are a registered
+GitHub user.
 
-As this is my first larger project I already see a lot of things I could improve and probably have missed even more chances of improvement.
-Constructive criticism is always welcome.
+As this is my first larger project I already see a lot of things I could improve and probably have missed even more chances of 
+improvement. Constructive criticism is always welcome.
 
 To find out how the bot exactly functions, please visit the wiki:
 https://github.com/EddieTheCubeHead/Scrim-Bot/wiki/ScrimBot--all-commands-and-functionalities
